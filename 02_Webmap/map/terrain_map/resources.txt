@@ -1,0 +1,5 @@
+//javascript guidelines to put geoJSON data on leaflet matp
+http://leafletjs.com/examples/geojson/
+
+//import geoJSON with jquery
+http://savaslabs.com/2015/05/18/mapping-geojson.html
