@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Center for Spatial Research: Colombia Victims</title>
+		<script type="text/javascript" src="d3/d3.js"></script>
+		<style type="text/css">
+			
+			rect:hover {
+				fill: orange;
+			}
+			
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 16px;
+				line-height: 20px;
+			}
+
+		</style>
+	</head>
+	<body>
+		
+		<p>EVENTUALLY click here to change the sorting method</p>
+
+		<div id="tooltip" class="hidden">
+			<p><strong>Data Read Out Test</strong></p>
+			<p><span id="value">100</span>%</p>
+		</div>
+
+		<script type="text/javascript">
+
+			//Width and height
+			var w = 700;
+			var h = 250;
+			
+			// Load a sample colombia data object, make like 10 dummy data of first 10 columns.
+			// Then attempt to load from csv
+			var datasetVictims = [  { key: 0, cod_persona: 5, para_hecho: 5, f_ocurrencia_hecho: 3 },
+									{ key: 1, cod_persona: 1, para_hecho: 2, f_ocurrencia_hecho: 2  },
+									{ key: 2, cod_persona: 3, para_hecho: 3, f_ocurrencia_hecho: 6  },
+									{ key: 3, cod_persona: 2, para_hecho: 6, f_ocurrencia_hecho: 1  },
+									{ key: 4, cod_persona: 8, para_hecho: 1, f_ocurrencia_hecho: 4  },
+									{ key: 5, cod_persona: 5, para_hecho: 5, f_ocurrencia_hecho: 5  } ];
+
+			// Define rectangle height and width
+			var rectWidth = 20;
+			var rectHeight = 20;
+			var rectSpacerW = 1;
+
+			// var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+			// 				11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
+
+			//Transition variables
+			var onClickTransTime = 2000;
+			var onClickEaseType = "linear";
+			var randomMaxInt = 50;
+
+			//Set the scale
+			// var xScale = d3.scaleOrdinal()
+			// 				.domain(d3.range(dataset.length))
+			// 				.rangeRoundBands([0, w], 0.05);
+			var xScale = d3.scaleBand()
+							.domain(d3.range(datasetVictims.length))
+							.rangeRound([0,w])
+							.padding(0.05);
+
+			var yScale = d3.scaleLinear()
+							.domain([0, d3.max(datasetVictims)])
+							.range([0, h]);
+
+			
+			//Create SVG element
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+			//Create bars
+			svg.selectAll("rect")
+			   .data(datasetVictims)
+			   .enter()
+			   .append("rect")
+			   .attr("x", function(d, i) {
+			   		// return xScale(i);
+			   		return i*(rectWidth + rectSpacerW);
+			   })
+			   .attr("y", function(d) {
+			   		return 0;
+			   })
+			   // .attr("width", xScale.rangeBand())
+			   .attr("width", rectWidth)
+			   .attr("height", rectHeight)
+			   .attr("fill", function(d) {
+					return "rgb(0, 0, " + (d.para_hecho * 40) + ")";
+			   })
+   			   .on("mouseover", function(d) {
+
+					//Get this rectangle's x/y values, then augment for the tooltip
+					var xPosition = parseFloat(d3.select(this).attr("x"));
+					var yPosition = parseFloat(d3.select(this).attr("y"));
+
+					//Update the tooltip position and value
+					d3.select("#tooltip")
+						.style("left", xPosition + "px")
+						.style("top", yPosition + "px")						
+						.select("#value")
+						.text("para_hecho: " + d.para_hecho);
+			   
+					//Show the tooltip
+					d3.select("#tooltip").classed("hidden", false);
+
+			   })
+			   .on("mouseout", function() {
+			   
+					//Hide the tooltip
+					d3.select("#tooltip").classed("hidden", true);
+					
+			   });
+
+			// //Create labels
+			// svg.selectAll("text")
+			//    .data(dataset)
+			//    .enter()
+			//    .append("text")
+			//    .text(function(d) {
+			//    		return d;
+			//    })
+			//    .attr("text-anchor", "middle")
+			//    .attr("x", function(d, i) {
+			//    		// return xScale(i) + xScale.rangeBand() / 2;
+			//    		return xScale(i) + xScale.bandwidth() / 2;
+			//    })
+			//    .attr("y", function(d) {
+			//    		return h - yScale(d) + 14;
+			//    })
+			//    .attr("font-family", "sans-serif")
+			//    .attr("font-size", "11px")
+			//    .attr("fill", "white");
+
+		   // //Add an event listener
+		   // d3.select("p")
+		   // 		.on("click", function () {
+		   			
+		   // 			// New values for dataset
+		   // 			// dataset = [ 11, 12, 15, 20, 18, 17, 16, 18, 23, 25,
+     //                			// 5, 10, 13, 19, 21, 25, 22, 18, 15, 13 ];
+     //    			//Random dataset instead
+     //    			var numValues = dataset.length;
+     //    			dataset = [];
+     //    			for (var i = 0; i < numValues; i++) {
+     //    				var newNumber = Math.floor(Math.random()*randomMaxInt);
+     //    				dataset.push(newNumber);
+     //    			};
+
+     //    			//Update yScale domain
+     //    			yScale.domain([0, d3.max(dataset)]);
+
+     //    			//Update all the rectangles heights
+     //    			svg.selectAll("rect")
+     //    				.data(dataset)
+     //    				.transition()
+     //    				.delay(function(d, i) {
+     //    					return i * 50;
+     //    				})
+     //    				.duration(onClickTransTime)
+     //    				// .ease(onClickEaseType)
+     //    				.attr("y", function(d) {
+     //    					return h - yScale(d);
+     //    				})
+     //    				.attr("height", function(d) {
+     //    					return yScale(d);
+     //    				})
+     //    				.attr("fill", function(d) {
+     //    					return "rgb(0,0,"+(d*10)+")";
+     //    				});
+
+    	// 			//Update all the rectangles' labels
+    	// 			svg.selectAll("text")
+    	// 				.data(dataset)
+    	// 				.transition()
+    	// 				.delay(function(d, i) {
+     //    					return i * 50;
+     //    				})
+    	// 				.duration(onClickTransTime)
+    	// 				// .ease(onClickEaseType)
+    	// 				.text(function(d){
+    	// 					return d;
+    	// 				})
+    	// 				.attr("y", function(d){
+    	// 					return h - yScale(d)+14;
+    	// 				});
+
+		   // 		});
+			
+		</script>
+
+	</body>
+</html>
