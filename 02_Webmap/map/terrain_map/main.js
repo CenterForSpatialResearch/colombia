@@ -31,7 +31,7 @@ map = (function () {
     }
 
     // determine the scene url and content to load during start-up
-    var scene_url = 'styles/three-lights.yaml';
+    var scene_url = 'three-lights.yaml';
 
     // If there is a query, use it as the scene_url
     var query = parseQuery(window.location.search.slice(1));
@@ -85,11 +85,9 @@ map = (function () {
     return map;
 
 }());
-/*
-var myLines = [{ "type": "LineString",
-    "coordinates": [ [-77.011535895500003,3.8754743059100001],[-77.002845043838448,3.8778107638653778] ]
-    }];*/
 
+
+/*
 var myStyle = {
         "color": "#ff0000",
         "weight": 1,
@@ -102,11 +100,42 @@ function addDataToMap(data, map) {
         }).addTo(map);
 
     //dataLayer.addTo(map);
+};*/
+function getLineWeight(c) {
+    return c > 40000  ? 4 :
+           c > 30000  ? 3.5 :
+           c > 20000  ? 3 :
+           c > 10000  ? 2.5 :
+           c > 5000   ? 2 :
+           c > 2500   ? 1.5 :
+           c > 1000   ? 1 :
+                        0.5;
 }
 
 
+function style(feature) {
+    return {
+        weight :getLineWeight(feature.properties.Count),
+        color: '#ff0000',
+        opacity: 1
+    };
+}
 
-$.getJSON("DisplacementSample2.geojson",function(data) {addDataToMap(data, map); });
+function addDataToMap(data, map){
+    L.geoJSON(data, {
+        style: style    
+        }).addTo(map);
+};
+
+
+
+$.getJSON("Displacement_Edited.geojson",function(data) {addDataToMap(data, map); });
+
+
+
+
+
+
 
 /*
 L.geoJSON(myLines, {
