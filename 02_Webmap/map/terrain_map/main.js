@@ -52,6 +52,22 @@ map = (function () {
         attribution: '<a href="https://mapzen.com/tangram" target="_blank">Tangram</a> | &copy; OSM contributors | <a href="https://mapzen.com/" target="_blank">Mapzen</a>'
     });
 
+    map.createPane('labels');
+/*
+    var positronLabels = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png', {
+            attribution: '©OpenStreetMap, ©CartoDB',
+            pane: 'labels'
+    });*/
+
+    var positronLabels = Tangram.leafletLayer({
+        scene: 'labels.yaml',
+        attribution: '<a href="https://mapzen.com/tangram" target="_blank">Tangram</a> | &copy; OSM contributors | <a href="https://mapzen.com/" target="_blank">Mapzen</a>',
+        pane: 'labels'
+    });
+
+   positronLabels.addTo(map);
+
+
 
 
     if (query.quiet) {
@@ -82,7 +98,6 @@ map = (function () {
 
     layer.addTo(map);
 
- 
 
     return map;
 
@@ -175,6 +190,7 @@ window.onload = function(){
     document.getElementById("refresh").onclick=function(){  
     //var vectors = new Lines();
         refresh();
+        map.layer.bringToFront();
         leafletLayer.addTo(map);
     };
 
@@ -209,12 +225,6 @@ function update(jscolor){
     var line = '#'+jscolor;
     leafletLayer.setStyle({color:line});
 }
-
-
-
-
-
-
 
 
 /*
