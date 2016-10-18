@@ -26,12 +26,34 @@
             height: 100%;
             width: 100%;
             position: absolute;
+            display: block;
+            z-index: -1;
+        }
+
+        #canvas1{
+            border:1px solid #d3d3d3; 
+            background-color: #ff0000;
+            display: block;
+            z-index: 2;
+     
+        }
+
+        #gui{
+            width:300px;
+            height:300px;
+            background: blue;
+            float: right;
         }
     </style>
   </head>
 
   <body>
-    <div id="map"></div>
+    
+    <div id="map">
+
+    </div>
+    
+
 
     <!-- 3rd party libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.3/leaflet.js"></script>
@@ -43,7 +65,7 @@
 
     <!-- Main tangram library -->
     <script src="https://mapzen.com/tangram/0.9/tangram.min.js"></script>
-    <script type = "text/javascript" src="dat.gui.js"></script>
+    
     <!-- Demo module -->
     <script src="main.js"></script>
 
@@ -52,10 +74,306 @@
 
 
     <!--GUI-->
-    
-   
 
-   
+    <script src="jscolor.js"></script>
+
+
+    <div id="gui">
+        <button id="show">show</button>
+        <button id="hide">hide</button>
+        <input class="jscolor {onFineChange:'update(this)'}" value="cc66ff">
+
+
+        <form>
+        <select id="mySelect">
+          <option value="BUENAVENTURA">BUENAVENTURA</option>
+          <option value="TIBÚ">TIBÚ</option>
+          <option value="EL">EL</option>
+          <option value="RIOSUCIO">RIOSUCIO</option>
+          <option value="BELLAVISTA">BELLAVISTA</option>
+          <option value="PRADO">PRADO</option>
+          <option value="SAN">SAN</option>
+          <option value="RICAURTE">RICAURTE</option>
+          <option value="DABEIBA">DABEIBA</option>
+          <option value="APARTADÓ">APARTADÓ</option>
+          <option value="GRANADA">GRANADA</option>
+          <option value="TIERRALTA">TIERRALTA</option>
+          <option value="CIÉNAGA">CIÉNAGA</option>
+          <option value="FUNDACIÓN">FUNDACIÓN</option>
+          <option value="PIVIJAY">PIVIJAY</option>
+          <option value="URRAO">URRAO</option>
+          <option value="TURBO">TURBO</option>
+          <option value="ITUANGO">ITUANGO</option>
+          <option value="OVEJAS">OVEJAS</option>
+          <option value="VISTAHERMOSA">VISTAHERMOSA</option>
+          <option value="ARGELIA">ARGELIA</option>
+          <option value="BOLÍVAR">BOLÍVAR</option>
+          <option value="MARÍA">MARÍA</option>
+          <option value="CARTAGENA">CARTAGENA</option>
+          <option value="CHAPARRAL">CHAPARRAL</option>
+          <option value="TUMACO">TUMACO</option>
+          <option value="TOLÚ">TOLÚ</option>
+          <option value="SAMANÁ">SAMANÁ</option>
+          <option value="PUERTO">PUERTO</option>
+          <option value="ARBOLETES">ARBOLETES</option>
+          <option value="CURILLO">CURILLO</option>
+          <option value="DIBULLA">DIBULLA</option>
+          <option value="SANTA">SANTA</option>
+          <option value="COYAIMA">COYAIMA</option>
+          <option value="AGUSTÍN">AGUSTÍN</option>
+          <option value="LA">LA</option>
+          <option value="LÓPEZ">LÓPEZ</option>
+          <option value="MAPIRIPÁN">MAPIRIPÁN</option>
+          <option value="CANTAGALLO">CANTAGALLO</option>
+          <option value="CASABE">CASABE</option>
+          <option value="MILÁN">MILÁN</option>
+          <option value="BETÉ">BETÉ</option>
+          <option value="ARACATACA">ARACATACA</option>
+          <option value="CHIGORODÓ">CHIGORODÓ</option>
+          <option value="RIOBLANCO">RIOBLANCO</option>
+          <option value="MONTECRISTO">MONTECRISTO</option>
+          <option value="VALPARAÍSO">VALPARAÍSO</option>
+          <option value="COCORNÁ">COCORNÁ</option>
+          <option value="FLORENCIA">FLORENCIA</option>
+          <option value="NARIÑO">NARIÑO</option>
+          <option value="PIE">PIE</option>
+          <option value="SOLANO">SOLANO</option>
+          <option value="MUTATÁ">MUTATÁ</option>
+          <option value="TEORAMA">TEORAMA</option>
+          <option value="MEDELLÍN">MEDELLÍN</option>
+          <option value="SARDINATA">SARDINATA</option>
+          <option value="TAME">TAME</option>
+          <option value="NECOCLÍ">NECOCLÍ</option>
+          <option value="BUENOS">BUENOS</option>
+          <option value="ATACO">ATACO</option>
+          <option value="BARRANCABERMEJA">BARRANCABERMEJA</option>
+          <option value="SOLITA">SOLITA</option>
+          <option value="VIGÍA">VIGÍA</option>
+          <option value="SITIONUEVO">SITIONUEVO</option>
+          <option value="PLANADAS">PLANADAS</option>
+          <option value="ORTEGA">ORTEGA</option>
+          <option value="CUMARIBO">CUMARIBO</option>
+          <option value="TARAZÁ">TARAZÁ</option>
+          <option value="NATAGAIMA">NATAGAIMA</option>
+          <option value="SANTIAGO">SANTIAGO</option>
+          <option value="VALENCIA">VALENCIA</option>
+          <option value="ROVIRA">ROVIRA</option>
+          <option value="SEGOVIA">SEGOVIA</option>
+          <option value="CAJIBÍO">CAJIBÍO</option>
+          <option value="BETULIA">BETULIA</option>
+          <option value="PUEBLO">PUEBLO</option>
+          <option value="ALGECIRAS">ALGECIRAS</option>
+          <option value="POLICARPA">POLICARPA</option>
+          <option value="CAÑASGORDAS">CAÑASGORDAS</option>
+          <option value="BALBOA">BALBOA</option>
+          <option value="QUINCHÍA">QUINCHÍA</option>
+          <option value="LOS">LOS</option>
+          <option value="MIRAFLORES">MIRAFLORES</option>
+          <option value="VILLAGARZÓN">VILLAGARZÓN</option>
+          <option value="BELLO">BELLO</option>
+          <option value="IBAGUÉ">IBAGUÉ</option>
+          <option value="BOCAS">BOCAS</option>
+          <option value="FRONTINO">FRONTINO</option>
+          <option value="BARBACOAS">BARBACOAS</option>
+          <option value="CHALÁN">CHALÁN</option>
+          <option value="CÓRDOBA">CÓRDOBA</option>
+          <option value="ACHÍ">ACHÍ</option>
+          <option value="CAUCASIA">CAUCASIA</option>
+          <option value="LÍBANO">LÍBANO</option>
+          <option value="PEQUE">PEQUE</option>
+          <option value="COLOMBIA">COLOMBIA</option>
+          <option value="RÍO">RÍO</option>
+          <option value="CANALETE">CANALETE</option>
+          <option value="CAREPA">CAREPA</option>
+          <option value="VALLEDUPAR">VALLEDUPAR</option>
+          <option value="ANORÍ">ANORÍ</option>
+          <option value="MONTELÍBANO">MONTELÍBANO</option>
+          <option value="SONSÓN">SONSÓN</option>
+          <option value="CURUMANÍ">CURUMANÍ</option>
+          <option value="SABANA">SABANA</option>
+          <option value="CONVENCIÓN">CONVENCIÓN</option>
+          <option value="BELÉN">BELÉN</option>
+          <option value="ARAUQUITA">ARAUQUITA</option>
+          <option value="CÚCUTA">CÚCUTA</option>
+          <option value="VIOTÁ">VIOTÁ</option>
+          <option value="MESETAS">MESETAS</option>
+          <option value="ROBLES">ROBLES</option>
+          <option value="VALDIVIA">VALDIVIA</option>
+          <option value="RIONEGRO">RIONEGRO</option>
+          <option value="ZARAGOZA">ZARAGOZA</option>
+          <option value="SIMITÍ">SIMITÍ</option>
+          <option value="SALGAR">SALGAR</option>
+          <option value="PLATO">PLATO</option>
+          <option value="CURBARADÓ">CURBARADÓ</option>
+          <option value="SAMANIEGO">SAMANIEGO</option>
+          <option value="ISTMINA">ISTMINA</option>
+          <option value="LLORÓ">LLORÓ</option>
+          <option value="ANDAGOYA">ANDAGOYA</option>
+          <option value="YACOPÍ">YACOPÍ</option>
+          <option value="CUMBITARA">CUMBITARA</option>
+          <option value="URAMITA">URAMITA</option>
+          <option value="BAGADÓ">BAGADÓ</option>
+          <option value="NEIVA">NEIVA</option>
+          <option value="TORIBÍO">TORIBÍO</option>
+          <option value="ASTREA">ASTREA</option>
+          <option value="AMALFI">AMALFI</option>
+          <option value="CUNDAY">CUNDAY</option>
+          <option value="YARUMAL">YARUMAL</option>
+          <option value="RIOHACHA">RIOHACHA</option>
+          <option value="ANZOÁTEGUI">ANZOÁTEGUI</option>
+          <option value="VILLAVICENCIO">VILLAVICENCIO</option>
+          <option value="VILLANUEVA">VILLANUEVA</option>
+          <option value="SALAHONDA">SALAHONDA</option>
+          <option value="PITALITO">PITALITO</option>
+          <option value="CHIRIGUANÁ">CHIRIGUANÁ</option>
+          <option value="BECERRIL">BECERRIL</option>
+          <option value="SUCRE">SUCRE</option>
+          <option value="REMEDIOS">REMEDIOS</option>
+          <option value="BRICEÑO">BRICEÑO</option>
+          <option value="PENSILVANIA">PENSILVANIA</option>
+          <option value="DOLORES">DOLORES</option>
+          <option value="CAPARRAPÍ">CAPARRAPÍ</option>
+          <option value="ORITO">ORITO</option>
+          <option value="PAYÁN">PAYÁN</option>
+          <option value="DAGUA">DAGUA</option>
+          <option value="LEJANÍAS">LEJANÍAS</option>
+          <option value="PIAMONTE">PIAMONTE</option>
+          <option value="TENERIFE">TENERIFE</option>
+          <option value="ICONONZO">ICONONZO</option>
+          <option value="MORROA">MORROA</option>
+          <option value="BARAYA">BARAYA</option>
+          <option value="JURADÓ">JURADÓ</option>
+          <option value="CÁCERES">CÁCERES</option>
+          <option value="YOLOMBÓ">YOLOMBÓ</option>
+          <option value="VILLARRICA">VILLARRICA</option>
+          <option value="HACARÍ">HACARÍ</option>
+          <option value="SIMACOTA">SIMACOTA</option>
+          <option value="VEGACHÍ">VEGACHÍ</option>
+          <option value="MERCADERES">MERCADERES</option>
+          <option value="CHIVOLO">CHIVOLO</option>
+          <option value="TELLO">TELLO</option>
+          <option value="GARZÓN">GARZÓN</option>
+          <option value="ALMAGUER">ALMAGUER</option>
+          <option value="URIBE">URIBE</option>
+          <option value="MAGANGUÉ">MAGANGUÉ</option>
+          <option value="TADÓ">TADÓ</option>
+          <option value="ZAMBRANO">ZAMBRANO</option>
+          <option value="SUÁREZ">SUÁREZ</option>
+          <option value="ISCUANDÉ">ISCUANDÉ</option>
+          <option value="REMOLINO">REMOLINO</option>
+          <option value="BURITICÁ">BURITICÁ</option>
+          <option value="SIPÍ">SIPÍ</option>
+          <option value="AYAPEL">AYAPEL</option>
+          <option value="SABANALARGA">SABANALARGA</option>
+          <option value="CHIMICHAGUA">CHIMICHAGUA</option>
+          <option value="MORALES">MORALES</option>
+          <option value="BARRANCO">BARRANCO</option>
+          <option value="PINILLOS">PINILLOS</option>
+          <option value="ALGARROBO">ALGARROBO</option>
+          <option value="CALAMAR">CALAMAR</option>
+          <option value="CRAVO">CRAVO</option>
+          <option value="LEBRIJA">LEBRIJA</option>
+          <option value="ALTOS">ALTOS</option>
+          <option value="SARAVENA">SARAVENA</option>
+          <option value="ÁBREGO">ÁBREGO</option>
+          <option value="ABEJORRAL">ABEJORRAL</option>
+          <option value="GUAPÍ">GUAPÍ</option>
+          <option value="PAIMADÓ">PAIMADÓ</option>
+          <option value="ITAGÜÍ">ITAGÜÍ</option>
+          <option value="UNGUÍA">UNGUÍA</option>
+          <option value="CIUDAD">CIUDAD</option>
+          <option value="OCAÑA">OCAÑA</option>
+          <option value="AGUACHICA">AGUACHICA</option>
+          <option value="ANDES">ANDES</option>
+          <option value="TOTORÓ">TOTORÓ</option>
+          <option value="CONCORDIA">CONCORDIA</option>
+          <option value="YUTO">YUTO</option>
+          <option value="GIGANTE">GIGANTE</option>
+          <option value="GUACHAVÉS">GUACHAVÉS</option>
+          <option value="PAILITAS">PAILITAS</option>
+          <option value="MAJAGUAL">MAJAGUAL</option>
+          <option value="BOSCONIA">BOSCONIA</option>
+          <option value="CAJAMARCA">CAJAMARCA</option>
+          <option value="RONCESVALLES">RONCESVALLES</option>
+          <option value="VILLAHERMOSA">VILLAHERMOSA</option>
+          <option value="CAMPAMENTO">CAMPAMENTO</option>
+          <option value="TIMBIQUÍ">TIMBIQUÍ</option>
+          <option value="FRESNO">FRESNO</option>
+          <option value="MONTERÍA">MONTERÍA</option>
+          <option value="TOPAIPÍ">TOPAIPÍ</option>
+          <option value="LANDÁZURI">LANDÁZURI</option>
+          <option value="CERRO">CERRO</option>
+          <option value="TIMBÍO">TIMBÍO</option>
+          <option value="TANGUA">TANGUA</option>
+          <option value="CAICEDO">CAICEDO</option>
+          <option value="ACEVEDO">ACEVEDO</option>
+          <option value="MITÚ">MITÚ</option>
+          <option value="JAMUNDÍ">JAMUNDÍ</option>
+          <option value="MAHATES">MAHATES</option>
+          <option value="ROSAS">ROSAS</option>
+          <option value="LINARES">LINARES</option>
+          <option value="GUARANDA">GUARANDA</option>
+          <option value="BARRANQUILLA">BARRANQUILLA</option>
+          <option value="ALEJANDRÍA">ALEJANDRÍA</option>
+          <option value="TOLEDO">TOLEDO</option>
+          <option value="MISTRATÓ">MISTRATÓ</option>
+          <option value="PUEBLOVIEJO">PUEBLOVIEJO</option>
+          <option value="MARQUETALIA">MARQUETALIA</option>
+          <option value="CIMITARRA">CIMITARRA</option>
+          <option value="ALBANIA">ALBANIA</option>
+          <option value="LIBORINA">LIBORINA</option>
+          <option value="TULUÁ">TULUÁ</option>
+          <option value="MEDINA">MEDINA</option>
+          <option value="PURIFICACIÓN">PURIFICACIÓN</option>
+          <option value="SANTANDER">SANTANDER</option>
+          <option value="BUGALAGRANDE">BUGALAGRANDE</option>
+          <option value="MORELIA">MORELIA</option>
+          <option value="SOACHA">SOACHA</option>
+          <option value="NECHÍ">NECHÍ</option>
+          <option value="SANTO">SANTO</option>
+          <option value="PUNTA">PUNTA</option>
+          <option value="COCONUCO">COCONUCO</option>
+          <option value="BUCARAMANGA">BUCARAMANGA</option>
+          <option value="PANDI">PANDI</option>
+          <option value="PEDRAZA">PEDRAZA</option>
+          <option value="CORINTO">CORINTO</option>
+          <option value="ARBOLEDAS">ARBOLEDAS</option>
+          <option value="CONDOTO">CONDOTO</option>
+          <option value="SURATÁ">SURATÁ</option>
+          <option value="GALERAS">GALERAS</option>
+          <option value="SILVANIA">SILVANIA</option>
+          <option value="ACANDÍ">ACANDÍ</option>
+          <option value="PORE">PORE</option>
+          <option value="URIBIA">URIBIA</option>
+          <option value="PALOCABILDO">PALOCABILDO</option>
+          <option value="PIZARRO">PIZARRO</option>
+          <option value="VENADILLO">VENADILLO</option>
+          <option value="TRUJILLO">TRUJILLO</option>
+          <option value="PEÑOL">PEÑOL</option>
+          <option value="LEIVA">LEIVA</option>
+          <option value="QUIPILE">QUIPILE</option>
+          <option value="GUAMO">GUAMO</option>
+          <option value="YOPAL">YOPAL</option>
+          <option value="PAISPAMBA">PAISPAMBA</option>
+          <option value="LÉRIDA">LÉRIDA</option>
+          <option value="ACACÍAS">ACACÍAS</option>
+          <option value="MAICAO">MAICAO</option>
+          <option value="FORTUL">FORTUL</option>
+          <option value="MATANZA">MATANZA</option>
+          <option value="BELALCÁZAR">BELALCÁZAR</option>
+          <option value="PLANETA">PLANETA</option>
+          <option value="PAZ">PAZ</option>
+          <option value="CAMPOALEGRE">CAMPOALEGRE</option>
+
+        </select>
+        </form>
+        <button type="button" onclick="filter()">Try it</button>
+        <!--<p id="demo"></p>-->
+
+
+    </div>
+
+
 
   </body>
 </html>

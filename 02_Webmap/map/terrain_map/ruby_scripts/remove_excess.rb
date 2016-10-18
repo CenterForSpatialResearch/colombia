@@ -12,7 +12,10 @@ dest=true
 
 word_array.each_with_index do |x,i|
 
-	if x=="[" and word_array[i+1]== "["
+	if word_array[i-2].include? "properties" and word_array[i-1]=="{"
+		edited.write("\"show_on_map\": \"true\", ")
+		edited.write(x)
+	elsif x=="[" and word_array[i+1]== "["
 		current.clear if current.size>0
 		current.push(i+1)
 
