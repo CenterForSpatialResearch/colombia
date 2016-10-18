@@ -16,7 +16,7 @@ function parseQuery (qstr) {
 map = (function () {
     'use strict';
 
-    var map_start_location = [4.624335, -74.063644, 12]; // Bogota
+    var map_start_location = [4.624335, -74.063644, 6]; // Bogota
 
     /*** URL parsing ***/
 
@@ -31,7 +31,7 @@ map = (function () {
     }
 
     // determine the scene url and content to load during start-up
-    var scene_url = 'styles/three-lights.yaml';
+    var scene_url = 'three-lights.yaml';
 
     // If there is a query, use it as the scene_url
     var query = parseQuery(window.location.search.slice(1));
@@ -42,8 +42,8 @@ map = (function () {
 
     var map = L.map('map', {
         "keyboardZoomOffset" : 1.,
-        "minZoom" : 2,
-        "maxZoom" : 16,
+        "minZoom" : 6,
+        "maxZoom" : 15,
         }
     );
 
@@ -51,6 +51,8 @@ map = (function () {
         scene: scene_url,
         attribution: '<a href="https://mapzen.com/tangram" target="_blank">Tangram</a> | &copy; OSM contributors | <a href="https://mapzen.com/" target="_blank">Mapzen</a>'
     });
+
+
 
     if (query.quiet) {
         layer.options.attribution = "";
@@ -85,28 +87,144 @@ map = (function () {
     return map;
 
 }());
-/*
-var myLines = [{ "type": "LineString",
-    "coordinates": [ [-77.011535895500003,3.8754743059100001],[-77.002845043838448,3.8778107638653778] ]
-    }];*/
 
-var myStyle = {
-        "color": "#ff0000",
-        "weight": 1,
-        "opacity": 0.65
+
+
+    /*function getColor(c){
+        if ("BUENAVENTURA"==c){
+            return '#ffa500';
+        }
+        else if ("TIBÚ"==c)
+            return '#0000ff';
+        else {
+            return '#ffffff';
+        }
+    }*/
+
+
+
+
+
+
+    //var search;
+
+    //STYLE FUNCTION
+    //READ BY L.geoJSON function
+    function style(feature) {   
+    return {
+        weight: getLineWeight(feature.properties.Count),
+        //color: '#ffa500',
+        opacity: 0.5,
+        color: '#ffa500'
+        /*
+        if("BUENAVENTURA"==leafletLayer.feature.properties.OrgMun){
+            color:'#ffffff'
+        } else {
+            color: '#00ff00'
+        }*/
+        
+        };
+    };
+
+    //COMPUTE LINE WEIGHT FROM count: PROPERTY
+    function getLineWeight(c) {
+    return c > 40000  ? 4 :
+           c > 30000  ? 3.5 :
+           c > 20000  ? 3 :
+           c > 10000  ? 2.5 :
+           c > 5000   ? 2 :
+           c > 2500   ? 1.5 :
+           c > 1000   ? 1 :
+                        0.5;
+}
+/*
+    function style(feature){
+        if("BUENAVENTURA"==feature.properties.OrgMun){
+                    return {color:'#ffffff'};
+                } else {
+                    return {color: '#00ff00'};
+                }
+    }*/
+
+    //ADD GEOJSON LAYER TO MAP OBJECT
+    var leafletLayer;
+    function addDataToMap(data, map){
+        leafletLayer = L.geoJSON(data, {
+            style: style    
+            }).addTo(map);
+    };
+    //GET DATA FROM GEOJSON
+    $.getJSON("Displacement_Edited.geojson",
+        function(data) {
+            addDataToMap(data, map); 
+        });
+
+
+
+//NOT SURE WHY THIS IS .ONLOAD
+window.onload = function(){
+    //var vectors = new Lines();
+
+    document.getElementById("hide").onclick=function(){  
+    //var vectors = new Lines();
+    map.removeLayer(leafletLayer);
+    //leafletLayer.setStyle({color: lineColor})
+
+    };
+
+    document.getElementById("refresh").onclick=function(){  
+    //var vectors = new Lines();
+        refresh();
+        leafletLayer.addTo(map);
+    };
+
+    /*document.getElementById("color").onclick=function(){
+        leafletLayer.setStyle({color: lineColor});
+    };*/
 };
 
-function addDataToMap(data, map) {
-    L.geoJSON(data, {
-        style: myStyle
-        }).addTo(map);
 
-    //dataLayer.addTo(map);
+//RESETS ALL VECTOR OPACITY
+function refresh(){
+    leafletLayer.eachLayer(function (layer){
+        layer.setStyle({opacity:0.5});
+    });
+}
+
+//
+function filter() {
+    map.removeLayer(leafletLayer);
+    refresh();
+    var x = document.getElementById("mySelect").value;
+
+    leafletLayer.eachLayer(function (layer){
+        if (layer.feature.properties.OrgMun!=x){
+            layer.setStyle({opacity: 0});
+        };
+    });
+    leafletLayer.addTo(map);
+}
+//CHANGE COLOR WITH COLOR PICKRE
+function update(jscolor){
+    var line = '#'+jscolor;
+    leafletLayer.setStyle({color:line});
 }
 
 
 
-$.getJSON("DisplacementSample2.geojson",function(data) {addDataToMap(data, map); });
+
+
+
+
+
+/*
+var lineColor;
+function update(jscolor) {
+        // 'jscolor' instance can be used as a string
+        lineColor = '#' + jscolor;
+        leafletLayer.setStyle({color:lineColor});
+};
+    */
 
 /*
 L.geoJSON(myLines, {

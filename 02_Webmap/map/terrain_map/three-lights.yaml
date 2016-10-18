@@ -15,54 +15,66 @@ lights:
     directional1:
         type: directional
         direction: [1,-.5, -.5]
-        diffuse: '#003366'
+        diffuse: '#64669a'
     directional2:
         type: directional
         direction: [-1, -1, -.5]
-        diffuse: '#003300'
+        diffuse: '#555555'
     directional3:
         type: directional
         direction: [0, -1, .2]
         diffuse: 1.5
 
-styles:
-    hillshade:
+styles: 
+    terrain-envmap:
         base: raster
         raster: normal
-        shaders: 
+        shaders:
+            uniforms:
+                u_scale: .15
+                u_envmap: imhof5.jpg
             blocks:
-                color: |
-                    color.rgb = vec3(1.);
-
-
+                global: |
+                    // Simplified view-independent environment map
+                    vec4 applyEnvmap (in sampler2D _tex, in vec3 _normal) {
+                        const vec3 eye = vec3(0.,0.,-1.);
+                        vec3 r = reflect(eye, _normal);
+                        r.z += 1.0;
+                        float m = 2. * length(r);
+                        vec2 uv = r.xy / m + .5;
+                        return texture2D(_tex, uv);
+                    }
+                color: |                    
+                    normal.z *= u_scale;
+                    normal = normalize(normal);
+                    color = applyEnvmap(u_envmap, normal);
 layers:
-    roads:
-        data: { source: osm}
-        draw: 
-            lines:
-                order: function() { return feature.sort_key;}
-                color: '#000000'
-                width: 1px
+
     terrain:
         data: { source: normals, layer: _default }
         draw:
-            hillshade:
+            terrain-envmap:
                 order: 0
 
-   
     earth:
         data: { source: osm }
         draw:
             lines: 
-                order: 2
+                order: 1
                 color: [.3, .3, .3]
                 width: 1px
-
+    water:
+        data: {source: osm}
+        draw:
+            polygons:
+                order: 2
+                color: '#000000'
     places:
         data: { source: osm}
         filter: 
             kind: [city]
         draw:
+            order: 
             text:
                 font:
                     fill: white
