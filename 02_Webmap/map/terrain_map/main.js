@@ -172,7 +172,7 @@ window.onload = function(){
 
     };
 
-    document.getElementById("show").onclick=function(){  
+    document.getElementById("refresh").onclick=function(){  
     //var vectors = new Lines();
         refresh();
         leafletLayer.addTo(map);
@@ -204,11 +204,11 @@ function filter() {
     });
     leafletLayer.addTo(map);
 }
-/*//CHANGE COLOR WITH COLOR PICKRE
+//CHANGE COLOR WITH COLOR PICKRE
 function update(jscolor){
     var line = '#'+jscolor;
     leafletLayer.setStyle({color:line});
-}*/
+}
 
 
 
