@@ -1,6 +1,5 @@
-orig_file = IO.read("Displacement_Edited.geojson")
-
-word_array = orig_file.split("\" \"")
+orig_file = IO.read(ARGV[0])
+word_array = orig_file.split(" ")
 
 edited= File.open("Displacement_Edited.geojson", "w+")
 
