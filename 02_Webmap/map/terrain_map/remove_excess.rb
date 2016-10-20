@@ -1,8 +1,8 @@
-orig_file = IO.read("DisplacementSample_02.geojson")
+orig_file = IO.read("Displacement_Large.geojson")
 
 word_array = orig_file.split("\" \"")
 
-edited= File.open("Displacement_Edited.geojson", "w+")
+edited= File.open("DisplacementLargeEdited.geojson", "w+")
 
 coordinates=[]
 current=[]
