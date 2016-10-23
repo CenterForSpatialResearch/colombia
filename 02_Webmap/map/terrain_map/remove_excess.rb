@@ -1,7 +1,7 @@
 orig_file = IO.read(ARGV[0])
 word_array = orig_file.split(" ")
 
-edited= File.open("Displacement_Edited.geojson", "w+")
+edited= File.open("DisplacementLargeEdited.geojson", "w+")
 
 coordinates=[]
 current=[]
