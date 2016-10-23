@@ -59,6 +59,7 @@ map = (function () {
             pane: 'labels'
     });*/
 
+//LABELS
     var positronLabels = Tangram.leafletLayer({
         scene: 'labels.yaml',
         attribution: '<a href="https://mapzen.com/tangram" target="_blank">Tangram</a> | &copy; OSM contributors | <a href="https://mapzen.com/" target="_blank">Mapzen</a>',
@@ -163,11 +164,56 @@ map = (function () {
 
     //ADD GEOJSON LAYER TO MAP OBJECT
     var leafletLayer;
+    
     function addDataToMap(data, map){
         leafletLayer = L.geoJSON(data, {
             style: style    
             }).addTo(map);
     };
+
+//GRADIENT LINES
+/*
+    var stops2gradient = function (stops) {
+        return {
+            vector: [
+                ['0%', '50%'],
+                ['100%', '50%']
+            ],
+            stops: [{
+                'offset': '0%',
+                    'style': {
+                    'color': stops[0],
+                        'opacity': 1
+                }
+            }, {
+                'offset': '100%',
+                    'style': {
+                    'color': stops[1],
+                        'opacity': 1
+                }
+            }]
+        }
+    };
+
+    function addDataToMap(data, map){
+        leafletLayer = L.DataLayer(data, {
+            recordsField: "FeatureCollection",
+            locationMode: 'latlng',
+            layerOptions:{
+                color: "#ff0000",
+                fillOpacity: 0.7,
+                opacity: 1,
+                weight: 1,
+                gradient: true
+            },
+            displayOptions:{
+                gradient_stops: stops2gradient
+            }
+        }).addTo(map);
+    };*/
+
+
+
     //GET DATA FROM GEOJSON
     $.getJSON("Displacement_Edited.geojson",
         function(data) {

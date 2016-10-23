@@ -49,7 +49,6 @@ styles:
                     normal = normalize(normal);
                     color = applyEnvmap(u_envmap, normal);
 layers:
-
     terrain:
         data: { source: normals, layer: _default }
         draw:
@@ -69,4 +68,14 @@ layers:
             polygons:
                 order: 2
                 color: '#000000'
-   
+    places:
+        data: { source: osm}
+        filter: 
+            kind: [city]
+        draw:
+            order: 
+            text:
+                font:
+                    fill: white
+                    size: 16px
+                    stroke: { color: '#444', width: 4px}
