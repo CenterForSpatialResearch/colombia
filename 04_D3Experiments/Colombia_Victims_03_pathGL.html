@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Center for Spatial Research: Colombia Victims</title>
+		<!-- // <script type="text/javascript" src="d3/d3.js"></script> -->
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="http://pathgl.com/dist/pathgl.js"></script>
+		<canvas height="1200px" width="1000px"></canvas>
+		<style type="text/css">
+			
+			rect:hover {
+				fill: orange;
+			}
+			
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 16px;
+				line-height: 20px;
+			}
+
+		</style>
+	</head>
+	<body>
+		
+
+		<div id="tooltip" class="hidden">
+			<p><strong>Data Read Out Test</strong></p>
+			<p><span id="value">100</span>%</p>
+		</div>
+
+		<script>
+
+			//Width and height
+			var w = 500;
+			var h = 600;
+
+			//Placeholder random data 
+			var desiredDatasetLen = 100000;
+			var datasetVictims = [];
+			for (var i = 0; i < desiredDatasetLen; i++) {
+				var ran_cod_persona = Math.floor(Math.random() * 10);
+				var ran_para_hecho = Math.floor(Math.random() * 15);
+				var ran_f_occurencia_hecho = Math.floor(Math.random() * desiredDatasetLen);
+				datasetVictims.push({ key: i, cod_persona: ran_cod_persona, para_hecho: ran_para_hecho, f_ocurrencia_hecho: ran_f_occurencia_hecho })
+			}
+
+
+			// Define rectangle height and width
+			var rectWidth =  rectHeight = 1;
+			var rectSpacerW = rectSpacerH = 0;
+
+
+			//Transition variables
+			var onClickTransTime = 2000;
+			var onClickEaseType = "linear";
+			var randomMaxInt = 50;
+
+			
+			//Create SVG element
+			// var svg = d3.select("canvas")
+			// 			.append("svg")
+			// 			.attr("width", w)
+			// 			.attr("height", h);
+
+			//Create bars
+			d3.select('canvas')
+				.selectAll("rect")
+			    .data(datasetVictims)
+			    .enter()
+			    .append("rect")
+			    .attr("x", function(d, i) {
+			   		// return xScale(i);
+			   		return (i*(rectWidth+rectSpacerW))%w;
+			    })
+			    .attr("y", function(d, i) {
+			   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+			    })
+			    // .attr("width", xScale.rangeBand())
+			    .attr("width", rectWidth)
+			    .attr("height", rectHeight)
+			    .attr("fill", function(d) {
+			    	return "rgb(0, 0, " + (d.para_hecho * 40) + ")";
+			    })
+			    // .attr("fill", "rgb(0, 0, 50)");
+			   // 	.on("click", function() {
+			   // 		sortRects();
+			   // })
+   			   .on("mouseover", function(d) {
+
+					//Get this rectangle's x/y values, then augment for the tooltip
+					var xPosition = parseFloat(d3.select(this).attr("x"));
+					var yPosition = parseFloat(d3.select(this).attr("y"));
+
+					//Update the tooltip position and value
+					d3.select("#tooltip")
+						.style("left", xPosition + "px")
+						.style("top", yPosition + "px")						
+						.select("#value")
+						.text("key: " + d.key + ", cod_persona: " + d.cod_persona + ", para_hecho: " + d.para_hecho );
+			   
+					//Show the tooltip
+					d3.select("#tooltip").classed("hidden", false);
+
+			   })
+			   .on("mouseout", function() {
+			   
+					//Hide the tooltip
+					d3.select("#tooltip").classed("hidden", true);
+					
+			   });
+
+			// //Define sort function
+			// var sortRects = function() {
+
+			// 	d3.select("canvas").selectAll("rect")
+			// 	   .sort(function(a, b) {
+			// 		   return d3.ascending(a.f_ocurrencia_hecho, b.f_ocurrencia_hecho);
+			// 	   	})
+			// 	   .transition()
+			// 	   .duration(1000)
+			// 	   .attr("x", function(d, i) {
+			// 	   		return (i*(rectWidth+rectSpacerW))%w;
+			// 	   })
+			// 	   .attr("y", function(d, i) {
+			// 	   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+			// 	   });
+
+			// };	
+
+			
+		</script>
+
+	</body>
+</html>
