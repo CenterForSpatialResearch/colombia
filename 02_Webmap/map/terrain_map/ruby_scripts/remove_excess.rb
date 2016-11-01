@@ -1,8 +1,7 @@
-orig_file = IO.read("DisplacementSample_02.geojson")
+orig_file = IO.read(ARGV[0])
+word_array = orig_file.split(" ")
 
-word_array = orig_file.split(' ')
-
-edited= File.open("Displacement_Edited.geojson", "w+")
+edited= File.open("DisplacementLargeEditedtest.geojson", "w+")
 
 coordinates=[]
 current=[]
@@ -12,10 +11,7 @@ dest=true
 
 word_array.each_with_index do |x,i|
 
-	if word_array[i-2].include? "properties" and word_array[i-1]=="{"
-		edited.write("\"show_on_map\": \"true\", ")
-		edited.write(x)
-	elsif x=="[" and word_array[i+1]== "["
+	if x=="[" and word_array[i+1]== "["
 		current.clear if current.size>0
 		current.push(i+1)
 
