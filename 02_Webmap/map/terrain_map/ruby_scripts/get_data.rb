@@ -1,7 +1,7 @@
 orig = IO.read("Displacement_Edited.geojson")
-geojson= orig.gsub(",","").split(" ")
+geojson= orig.gsub(",","").gsub(":","").split("\" \"")#.split("\"")
 
-
+puts geojson
 
 hash={}
 hash.default=0
@@ -13,8 +13,8 @@ end
 
 out= File.open("links.txt", "w+")
 hash.each do |key,value|
-
 	out.write "<option value=\"#{key}\">#{key}</option>\n"
+	puts "<option value=\"#{key}\">#{key}</option>\n"
 end
 
 
