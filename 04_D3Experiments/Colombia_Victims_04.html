@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Center for Spatial Research: Colombia Victims</title>
+		<script type="text/javascript" src="d3/d3.js"></script>
+		<script src="https://d3js.org/d3-queue.v3.min.js"></script>
+		<style type="text/css">
+			
+			rect:hover {
+				fill: orange;
+			}
+			
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 16px;
+				line-height: 20px;
+			}
+
+		</style>
+	</head>
+	<body>
+		
+		<p>EVENTUALLY click here to change the sorting method</p>
+
+		<div id="tooltip" class="hidden">
+			<p><strong>Data Read Out Test</strong></p>
+			<p><span id="value">100</span>%</p>
+		</div>
+
+		<script type="text/javascript">
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			// Establish globl parameters and parse data
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			//Define width and height of svg canvas
+			var w = 1000;
+			var h = 1200;
+
+			//Establish data variable at this top level so we can query data from the browser console
+			var datasetVictims = [];
+
+			//File path to data
+			myFileDataPath = "/04_D3Experiments/data/8k_test.csv";
+
+			//Run our script
+			parseMyFile(myFileDataPath);
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			// Parses our data file and establishes a queue so data is loaded before viz is run
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			function parseMyFile(myFileName) {
+				var q = d3.queue();
+				q.defer(function(callback) {
+					d3.csv(myFileName, function(res) {
+
+						//By default, csv loads all data as strings, here we parse the data into
+						//other data types
+						res.forEach(function(d,i) {
+							d.key = i;							//we also add a temporary key value
+							d.cod_persona = +d.cod_persona;
+							d.para_hecho = +d.para_hecho;
+						});
+
+						//Passes data to the queue once we have loaded datat
+						callback(null, res);
+					});
+				});
+
+				//Now that data has loaded, execute rest of code
+				q.await(restOfCode);
+			};
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			// The viz, we run after data is loaded
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			function restOfCode(err, results) {
+				
+				datasetVictims = results;
+
+				// Define rectangle height and width
+				var rectWidth =  rectHeight = 4;
+				var rectSpacerW = rectSpacerH = 0;
+
+				//Transition variables
+				var onClickTransTime = 2000;
+				var onClickEaseType = "linear";
+				// var randomMaxInt = 50;
+
+				// //Set the scale
+				// var xScale = d3.scaleBand()
+				// 				.domain(d3.range(datasetVictims.length))
+				// 				.rangeRound([0,w])
+				// 				.padding(0.05);
+
+				// var yScale = d3.scaleLinear()
+				// 				.domain([0, d3.max(datasetVictims)])
+				// 				.range([0, h]);
+
+				
+				//Create SVG element
+				var svg = d3.select("body")
+							.append("svg")
+							.attr("width", w)
+							.attr("height", h);
+
+				//Create rectangles
+				svg.selectAll("rect")
+				   .data(datasetVictims)
+				   .enter()
+				   .append("rect")
+				   .attr("x", function(d, i) {
+				   		// return xScale(i);
+				   		return (i*(rectWidth+rectSpacerW))%w;
+				   })
+				   .attr("y", function(d, i) {
+				   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+				   })
+				   // .attr("width", xScale.rangeBand())
+				   .attr("width", rectWidth)
+				   .attr("height", rectHeight)
+				   .attr("fill", function(d, i) {
+						// return "rgb(0, 0, " + (d.para_hecho * 40) + ")";
+						return "rgb(0,0, " + i%200 + ")";
+				   })
+				  //  	.on("click", function() {
+				  //  		sortRects();
+				  //  })
+	   			   .on("mouseover", function(d) {
+
+						//Get this rectangle's x/y values, then augment for the tooltip
+						var xPosition = parseFloat(d3.select(this).attr("x"));
+						var yPosition = parseFloat(d3.select(this).attr("y"));
+
+						//Update the tooltip position and value
+						d3.select("#tooltip")
+							.style("left", xPosition + "px")
+							.style("top", yPosition + "px")						
+							.select("#value")
+							.text("key: " + d.key + ", cod_persona: " + d.cod_persona + ", para_hecho: " + d.para_hecho );
+				   
+						//Show the tooltip
+						d3.select("#tooltip").classed("hidden", false);
+
+				   })
+				   .on("mouseout", function() {
+				   
+						//Hide the tooltip
+						d3.select("#tooltip").classed("hidden", true);
+						
+				   });
+
+				// //Create labels
+				// svg.selectAll("text")
+				//    .data(dataset)
+				//    .enter()
+				//    .append("text")
+				//    .text(function(d) {
+				//    		return d;
+				//    })
+				//    .attr("text-anchor", "middle")
+				//    .attr("x", function(d, i) {
+				//    		// return xScale(i) + xScale.rangeBand() / 2;
+				//    		return xScale(i) + xScale.bandwidth() / 2;
+				//    })
+				//    .attr("y", function(d) {
+				//    		return h - yScale(d) + 14;
+				//    })
+				//    .attr("font-family", "sans-serif")
+				//    .attr("font-size", "11px")
+				//    .attr("fill", "white");
+
+			   // //Add an event listener
+			   // d3.select("p")
+			   // 		.on("click", function () {
+			   			
+			   // 			// New values for dataset
+			   // 			// dataset = [ 11, 12, 15, 20, 18, 17, 16, 18, 23, 25,
+	     //                			// 5, 10, 13, 19, 21, 25, 22, 18, 15, 13 ];
+	     //    			//Random dataset instead
+	     //    			var numValues = dataset.length;
+	     //    			dataset = [];
+	     //    			for (var i = 0; i < numValues; i++) {
+	     //    				var newNumber = Math.floor(Math.random()*randomMaxInt);
+	     //    				dataset.push(newNumber);
+	     //    			};
+
+	     //    			//Update yScale domain
+	     //    			yScale.domain([0, d3.max(dataset)]);
+
+	     //    			//Update all the rectangles heights
+	     //    			svg.selectAll("rect")
+	     //    				.data(dataset)
+	     //    				.transition()
+	     //    				.delay(function(d, i) {
+	     //    					return i * 50;
+	     //    				})
+	     //    				.duration(onClickTransTime)
+	     //    				// .ease(onClickEaseType)
+	     //    				.attr("y", function(d) {
+	     //    					return h - yScale(d);
+	     //    				})
+	     //    				.attr("height", function(d) {
+	     //    					return yScale(d);
+	     //    				})
+	     //    				.attr("fill", function(d) {
+	     //    					return "rgb(0,0,"+(d*10)+")";
+	     //    				});
+
+	    	// 			//Update all the rectangles' labels
+	    	// 			svg.selectAll("text")
+	    	// 				.data(dataset)
+	    	// 				.transition()
+	    	// 				.delay(function(d, i) {
+	     //    					return i * 50;
+	     //    				})
+	    	// 				.duration(onClickTransTime)
+	    	// 				// .ease(onClickEaseType)
+	    	// 				.text(function(d){
+	    	// 					return d;
+	    	// 				})
+	    	// 				.attr("y", function(d){
+	    	// 					return h - yScale(d)+14;
+	    	// 				});
+
+			   // 		});
+				
+			}
+
+			//Load data from csv test
+			// d3.csv("/04_D3Experiments/data/8k_test.csv", function(data) {
+			// 	datasetVictims = data;
+			// });
+
+			//Loading data from the csv and cast appropriate types
+			// d3.csv("/04_D3Experiments/data/8k_test.csv", function(data) {
+			// 	data.forEach(function(d, i) {
+			// 		d.key = i;
+			// 		d.cod_persona = +d.cod_persona;
+			// 		d.para_hecho = +d.para_hecho;
+			// 		// d.f_ocurrencia_hecho = d.f_ocurrencia_hecho;
+			// 	});
+
+			// 	datasetVictims = data;
+			// });
+
+			// console.log(datasetVictims[100]);
+
+			//Placeholder random data 
+			// var desiredDatasetLen = 8000;
+			// var datasetVictims = [];
+			// for (var i = 0; i < desiredDatasetLen; i++) {
+			// 	var ran_cod_persona = Math.floor(Math.random() * 10);
+			// 	var ran_para_hecho = Math.floor(Math.random() * 15);
+			// 	var ran_f_occurencia_hecho = Math.floor(Math.random() * desiredDatasetLen);
+			// 	datasetVictims.push({ key: i, cod_persona: ran_cod_persona, para_hecho: ran_para_hecho, f_ocurrencia_hecho: ran_f_occurencia_hecho })
+			// }
+
+			
+		</script>
+
+	</body>
+</html>
