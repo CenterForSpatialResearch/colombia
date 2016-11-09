@@ -26,10 +26,26 @@
 				color:#0078ff;
 			}
 
-			#info {
+			#info{
 				color: #fff;
 				position: absolute;
 				top: 0px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#key{
+				color: #fff;
+				position: absolute;
+				top: 15px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#actor{
+				color: #fff;
+				position: absolute;
+				top: 30px; width: 100%;
 				padding: 5px;
 				z-index: 100;
 			}
@@ -41,14 +57,28 @@
 		<div id="info">
 			Testing three js
 		</div>
+
+		<div id="key">
+			Sory by key
+		</div>
+
+		<div id="actor">
+			Sory by actor
+		</div>
 		
 		<script>
+
+			// #############################################################################
+			// ############################# GLOBAL VARIABLES ##############################
+			// #############################################################################
 
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			var container, stats;
 			var camera, scene, renderer, particles, geometry, materials = [], colors = [], parameters, i, h, color, size;
 			var mouseX = 0, mouseY = 0;
+			var actorBool = true;
+			var keyBool, parametrosBool, ageBool, genderBool, personaBool, raceBool = false;
 
 			// var myWidth = 1200;
 			// var myHeight = 1200;
@@ -63,14 +93,16 @@
 			// var myFileDataPath = "/06_ThreeJS/data/SmallTest200k.csv";
 			var myFileDataPath = "/06_ThreeJS/data/200k_opened.csv";
 
+			//Victims dataset
 			var datasetVictims = [];
 
 			//Run our script
 			parseMyFile(myFileDataPath);
 
-			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-			// Parses our data file and establishes a queue so data is loaded before viz is run
-			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			// #############################################################################
+			// ###### Parses data and establishes queue to load data before viz is run #####
+			// #############################################################################
 
 			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			//!!!!!! NOTE NEED TO CLEAN THE DATA FILE AS SOME FIELDS ARE SPILLING OVER AND FORCING FIELDS OUT OF THEIR APPROPRIATE COLUMN, SEE GENDER
@@ -129,14 +161,37 @@
 				q.await(restOfCode);
 			};
 
+			// #############################################################################
+			// ################# AFTER DATA HAS LOADED, RUN THE REST #######################
+			// #############################################################################
+
 			function restOfCode(err, results) {
 
 				datasetVictims = results;
 
 				init();
 				animate();
+
+
+				//D3 to Handle click events on sorting our divs
+				d3.select("#key").on("click", function() {
+					console.log("You clicked the key!");
+					
+					keyBool = true;
+					personaBool = parametrosBool = ageBool = genderBool = actorBool = raceBool = false;
+				});
+
+				d3.select("#actor").on("click", function() {
+					console.log("You clicked actor!");
+
+					actorBool = true;
+					keyBool = parametrosBool = ageBool = genderBool = personaBool = raceBool = false;
+				});
 			}
 
+			// #############################################################################
+			// ##################### THREE JS INITIALIZATION ###############################
+			// #############################################################################
 
 			function init() {
 
@@ -159,12 +214,12 @@
 
 
 				scene = new THREE.Scene();
-				scene.fog = new THREE.FogExp2( 0x000000, 0.0007 );
+				// scene.fog = new THREE.FogExp2( 0x000000, 0.0007 );
 
-				var color1 = "rgb(250, 100, 100)";
-				var color2 = "rgb(20, 160, 190)";
-				var color3 = "rgb(90, 140, 250)";
-				var color4 = "rgb(200, 160, 80)";
+				// var color1 = "rgb(250, 100, 100)";
+				// var color2 = "rgb(20, 160, 190)";
+				// var color3 = "rgb(90, 140, 250)";
+				// var color4 = "rgb(200, 160, 80)";
 				// size = rectSize;
 
 
@@ -180,20 +235,23 @@
 
 					geometry.vertices.push( vertex );
 
-					var thisColor;
+					// var thisColor = colorActor(thisDataPt);
+					// var thisColor = colorHecho(thisDataPt);
+					// var thisColor = colorGender(thisDataPt);
+					var thisColor = colorRace(thisDataPt);
 
-					if (thisDataPt.autor_guerrillas == 1) {
-						thisColor = color1;
-					}
-					else if(thisDataPt.autor_paramilitares == 1) {
-						thisColor = color2;
-					}
-					else if(thisDataPt.autor_fuerza_publica == 1) {
-						thisColor = color3;
-					} 
-					else {
-						thisColor = color4;
-					}
+					// if (thisDataPt.autor_guerrillas == 1) {
+					// 	thisColor = color1;
+					// }
+					// else if(thisDataPt.autor_paramilitares == 1) {
+					// 	thisColor = color2;
+					// }
+					// else if(thisDataPt.autor_fuerza_publica == 1) {
+					// 	thisColor = color3;
+					// } 
+					// else {
+					// 	thisColor = color4;
+					// }
 
 					colors[i] = new THREE.Color(thisColor);
 				}
@@ -222,6 +280,10 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 			}
+
+			// #############################################################################
+			// ######################## THREE JS DOCUMENT EVENTS ###########################
+			// #############################################################################
 
 			function onWindowResize() {
 
@@ -268,7 +330,95 @@
 
 			}
 
-			//
+			// #############################################################################
+			// ############################ COLOR FUNCTIONS ###############################
+			// #############################################################################
+
+			function colorHecho (_thisDataPt) {
+				var _color1 = "rgb(24, 100, 90)";
+				var _color2 = "rgb(169, 100, 90)";
+				var _color3 = "rgb(211, 200, 82)";
+				var _color4 = "rgb(0, 0, 35)";
+
+				if(_thisDataPt.param_hecho == 5) {
+					return _color1;
+				}
+				else if(_thisDataPt.param_hecho == 6) {
+					return _color2;
+				}
+				else if(_thisDataPt.param_hecho == 2) {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}
+			}
+
+			function colorActor (_thisDataPt) {
+				var _color1 = "rgb(250, 100, 100)";
+				var _color2 = "rgb(20, 160, 190)";
+				var _color3 = "rgb(90, 140, 250)";
+				var _color4 = "rgb(200, 160, 80)";
+
+				if (_thisDataPt.autor_guerrillas == 1) {
+					return _color1;
+				}
+				else if(_thisDataPt.autor_paramilitares == 1) {
+					return _color2;
+				}
+				else if(_thisDataPt.autor_fuerza_publica == 1) {
+					return _color3;
+				} 
+				else {
+					return _color4;
+				}
+			}
+
+			function colorGender (_thisDataPt) {
+				//Might need ot change for large or small city
+
+				var _color1 = "rgb(318, 82, 88)";
+				var _color2 = "rgb(78, 82, 88)";
+				var _color3 = "rgb(198, 82, 88)";
+				var _color4 = "rgb(70, 30, 35)";
+
+				if(_thisDataPt.genero_hom == "Mujer") {
+					return _color1;
+				}
+				else if(_thisDataPt.genero_hom == "Female") {
+					return _color2;
+				}
+				else if(_thisDataPt.genero_hom == "No Informa") {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}
+			}
+
+			function colorRace (_thisDataPt) {
+				var _color1 = "rgb(150, 75, 70)";
+				var _color2 = "rgb(39, 75, 100)";
+				var _color3 = "rgb(279, 75, 75)";
+				var _color4 = "rgb(90, 90, 35)";
+
+				if(_thisDataPt.pert_etnica == "None") {
+					return _color1;
+				}
+				else if(_thisDataPt.pert_etnica == "Afrocolombian") {
+					return _color2;
+				}
+				else if(_thisDataPt.pert_etnica == "Indigenous") {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}	
+			}
+
+			// #############################################################################
+			// ##################### THREE JS ANIMATION  AND RENDER ########################
+			// #############################################################################
 
 			function animate() {
 
