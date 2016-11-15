@@ -18,6 +18,13 @@ lights:
         type: directional
         direction: [-1, -.4, -.5]
         diffuse: '#535353'
+    point1:
+        type: point
+        position: [1,1,2.4]
+        ambient: [0.1,0.1,0.1]
+        diffuse: [0.01,0.01,0.01]
+        specular: [1,1,1]
+
 
 
 styles: 

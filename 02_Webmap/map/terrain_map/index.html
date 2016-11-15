@@ -23,12 +23,33 @@
 
         #map {
             background: rgba(0, 0, 0, 0);
-            height: 100%;
+            height: 90%;
             width: 100%;
             position: absolute;
             display: block;
     
         }
+        #console{
+            height: 11%;
+            width: 100%;
+            position: fixed;
+            display: block;
+            bottom: 0;
+            background-color: black;
+            color: white;
+            padding-left: 10px;
+            z-index: 10000;
+
+        }
+        #title{
+            display: inline-block;
+            width: 200px;
+            height: 30px; 
+            border: 1px solid white;
+            position: relative;
+            float: left;
+        }
+ 
 
    
        
@@ -36,22 +57,43 @@
   </head>
 
   <body>
-
+ 
+<div id="console"><p id="title">Conflict: Colombia</p></div>
     <div id="map"></div>
+    
+    
+
+
 
     <svg>
         <defs>
             
-            <linearGradient id='grad1' x1="100%" y1="0%" x2="100%" y2="100%">
-                <stop offset='0%' stop-color='#fd6020' stop-opacity='0.7' />
+            <linearGradient id='NE' spreadMethod="pad" x1="0" y1="100%" x2="100%" y2="0%">
+                 <stop offset='0%' stop-color='#fa612f' stop-opacity='2' />
+                 <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
+            </linearGradient>
+
+
+            <linearGradient id='NW' spreadMethod="pad" x1="100%" y1="100%" x2="0%" y2="0%">
+                 <stop offset='0%' stop-color='#fa612f' stop-opacity='1' />
+                 <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
+            </linearGradient>
+
+
+            <linearGradient id='SE' spreadMethod="pad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset='0%' stop-color='#fa612f' stop-opacity='1' />
                 <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
             </linearGradient>
-            <radialGradient id='grad2' fx="0%" fy="0%" cx="0%" cy="0%" r="150%">
-                <stop offset='20%' stop-color='#FFFFFF' stop-opacity = '1'/>
-                <stop offset='100%' stop-color='#fd6020' stop-opacity='1' />
-            </radialGradient>
+
+
+            <linearGradient id='SW' spreadMethod="pad" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset='0%' stop-color='#fa612f' stop-opacity='1' />
+                <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
+            </linearGradient>
+            
         </defs>
     </svg>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.1/images/marker-icon.png"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
