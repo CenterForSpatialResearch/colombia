@@ -35,7 +35,8 @@
 				z-index: 100;
 			}*/
 
-			#key{
+			/*Buttons to sort*/
+			#sortKey{
 				color: #fff;
 				position: absolute;
 				top: 0px; width: 100%;
@@ -43,7 +44,7 @@
 				z-index: 100;
 			}
 
-			#hecho{
+			#sortHecho{
 				color: #fff;
 				position: absolute;
 				top: 30px; width: 100%;
@@ -51,7 +52,7 @@
 				z-index: 100;
 			}
 
-			#actor{
+			#sortActor{
 				color: #fff;
 				position: absolute;
 				top: 60px; width: 100%;
@@ -59,7 +60,7 @@
 				z-index: 100;
 			}
 
-			#gender{
+			#sortGender{
 				color: #fff;
 				position: absolute;
 				top: 90px; width: 100%;
@@ -67,7 +68,7 @@
 				z-index: 100;
 			}
 
-			#race{
+			#sortRace{
 				color: #fff;
 				position: absolute;
 				top: 120px; width: 100%;
@@ -75,10 +76,59 @@
 				z-index: 100;
 			}
 
-			#date{
+			#sortDate{
 				color: #fff;
 				position: absolute;
 				top: 150px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			/*Buttons to color */
+			#colorKey{
+				color: #fff;
+				position: absolute;
+				top: 200px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorHecho{
+				color: #fff;
+				position: absolute;
+				top: 230px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorActor{
+				color: #fff;
+				position: absolute;
+				top: 260px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorGender{
+				color: #fff;
+				position: absolute;
+				top: 290px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorRace{
+				color: #fff;
+				position: absolute;
+				top: 320px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorDate{
+				color: #fff;
+				position: absolute;
+				top: 350px; width: 100%;
 				padding: 5px;
 				z-index: 100;
 			}
@@ -117,30 +167,57 @@
 			Testing three js
 		</div> -->
 
+		<!-- Change data sorting -->
 
-		<div id="key">
+		<div id="sortKey">
 			Sort by key
 		</div>
 
-		<div id="hecho">
+		<div id="sortHecho">
 			Sort by param hecho
 		</div>
 
-		<div id="actor">
+		<div id="sortActor">
 			Sort by actor
 		</div>
 
-		<div id="gender">
+		<div id="sortGender">
 			Sort by gender
 		</div>
 
-		<div id="race">
+		<div id="sortRace">
 			Sort by race
 		</div>
 
-		<div id="date">
+		<div id="sortDate">
 			Sort by date
 		</div>
+
+		<!-- Change data color -->
+
+		<div id="colorKey">
+			Color by Key
+		</div>
+
+		<div id="colorHecho">
+			Color by Hecho
+		</div>
+
+		<div id="colorActor">
+			Color by Actor
+		</div>
+
+		<div id="colorGender">
+			Color by Gender
+		</div>
+
+		<div id="colorRace">
+			Color by Race
+		</div>
+
+<!-- 		<div id="colorDate">
+			Color by Date
+		</div> -->
 
 		<div id="tooltip" class="hidden">
 			<p><strong>My Value</strong></p>
@@ -170,8 +247,8 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 
-			var rectSize = 5;
-			var rectSpacerW = rectSpacerH = 2;
+			var rectSize = 1;
+			var rectSpacerW = rectSpacerH = 1;
 
 			var mouse = new THREE.Vector2();
 			var threshold = rectSpacerW*2;
@@ -279,8 +356,10 @@
 				// ################# D3 div Click Events #######################
 				// #############################################################
 
+				// ### Sorting events ###
+
 				//D3 to Handle click events on sorting our divs
-				d3.select("#key").on("click", function() {
+				d3.select("#sortKey").on("click", function() {
 					console.log("You clicked the key!");
 
 					resetAnimation();
@@ -300,13 +379,13 @@
 						geometry.vertices[i].endPosition = end3Vector;
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 
-						geometry.colors[i] = colorKey(thisDataPt);
+						// geometry.colors[i] = colorKey(thisDataPt);
 					}
 
 				});
 
 				
-				d3.select("#hecho").on("click", function() {
+				d3.select("#sortHecho").on("click", function() {
 					console.log("You clicked the hecho!");
 
 					resetAnimation();
@@ -326,12 +405,12 @@
 						geometry.vertices[i].endPosition = end3Vector;
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 
-						geometry.colors[i] = colorHecho(thisDataPt);
+						// geometry.colors[i] = colorHecho(thisDataPt);
 					}
 
 				});
 
-				d3.select("#actor").on("click", function() {
+				d3.select("#sortActor").on("click", function() {
 					console.log("You clicked actor!");
 
 					resetAnimation();
@@ -351,13 +430,13 @@
 						geometry.vertices[i].endPosition = end3Vector;
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 
-						geometry.colors[i] = colorActor(thisDataPt);
+						// geometry.colors[i] = colorActor(thisDataPt);
 					}
 
 
 				});
 
-				d3.select("#gender").on("click", function() {
+				d3.select("#sortGender").on("click", function() {
 					console.log("You clicked the gender!");
 					
 					resetAnimation();
@@ -377,12 +456,12 @@
 						geometry.vertices[i].endPosition = end3Vector;
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 
-						geometry.colors[i] = colorGender(thisDataPt);
+						// geometry.colors[i] = colorGender(thisDataPt);
 					}
 
 				});
 
-				d3.select("#race").on("click", function() {
+				d3.select("#sortRace").on("click", function() {
 					console.log("You clicked the race!");
 
 					resetAnimation();
@@ -402,12 +481,12 @@
 						geometry.vertices[i].endPosition = end3Vector;
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 
-						geometry.colors[i] = colorRace(thisDataPt);
+						// geometry.colors[i] = colorRace(thisDataPt);
 					}
 
 				});
 
-				d3.select("#date").on("click", function() {
+				d3.select("#sortDate").on("click", function() {
 					console.log("You clicked the date!");
 					
 					resetAnimation();
@@ -415,7 +494,7 @@
 					// var geometry = scene.children[0].geometry;
 
 					//Color by a random color method
-					var randomColorSelect = Math.random();
+					// var randomColorSelect = Math.random();
 
 					//Update the 3vectors for all of the particles loaded
 					for (i = 0; i < dataSetLen; i ++){
@@ -430,20 +509,97 @@
 						geometry.vertices[i].endPosition = end3Vector;
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 
-						if (randomColorSelect < 0.2) {
-							geometry.colors[i] = colorKey(thisDataPt);
-						} else if (randomColorSelect < 0.4) {
-							geometry.colors[i] = colorHecho(thisDataPt);
-						} else if (randomColorSelect < 0.6) {
-							geometry.colors[i] = colorActor(thisDataPt);
-						} else if (randomColorSelect < 0.8) {
-							geometry.colors[i] = colorGender(thisDataPt);
-						} else {
-							geometry.colors[i] = colorRace(thisDataPt);
-						}
+						// if (randomColorSelect < 0.2) {
+						// 	geometry.colors[i] = colorKey(thisDataPt);
+						// } else if (randomColorSelect < 0.4) {
+						// 	geometry.colors[i] = colorHecho(thisDataPt);
+						// } else if (randomColorSelect < 0.6) {
+						// 	geometry.colors[i] = colorActor(thisDataPt);
+						// } else if (randomColorSelect < 0.8) {
+						// 	geometry.colors[i] = colorGender(thisDataPt);
+						// } else {
+						// 	geometry.colors[i] = colorRace(thisDataPt);
+						// }
 					}
 
 				});
+
+				// ### Color Events ###
+
+				d3.select("#colorKey").on("click", function() {
+					console.log("You want to color by key!");
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorKey(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorHecho").on("click", function() {
+					console.log("You want to color by hecho!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorHecho(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorActor").on("click", function() {
+					console.log("You want to color by actor!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorActor(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorGender").on("click", function() {
+					console.log("You want to color by gender!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorGender(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorRace").on("click", function() {
+					console.log("You want to color by race!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorRace(thisDataPt);
+					}
+
+				});
+
+				// //No date color :/ could make it a color gradient?
+				// d3.select("#colorDate").on("click", function() {
+				// 	console.log("You want to color by date!");
+
+				// 	// Update colors of the particles
+				// 	for (i = 0; i < dataSetLen; i ++){
+
+				// 		var thisDataPt = datasetVictims[i];
+				// 		geometry.colors[i] = colorDate(thisDataPt);
+				// 	}
+
+				// 	// Color by date gradient
+
+				// });
 
 
 			}
@@ -463,8 +619,8 @@
 				myHeight = viewSize;
 				myWidth = parseInt(viewSize*aspectRatio);
 
-				camViewSize = 200;
-				camHshift = 200;
+				camViewSize = viewSize+200;
+				camHshift = 10;
 
 
 				// camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
@@ -662,9 +818,15 @@
 				}	
 			}
 
+			// function colorDate (_thisDataPt) {
+			// 	var gradientLength = datasetVictims.length;;
+
+			// 	return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
+			// }
+
 			function resetAnimation() {
 				raycastOn = false;
-				console.log(raycastOn);
+				// console.log(raycastOn);
 				currentTime = duration;
 			}
 
