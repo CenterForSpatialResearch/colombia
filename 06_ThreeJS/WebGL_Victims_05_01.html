@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+		<title>three.js webgl - particles</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<script src="/06_ThreeJS/build/three.js"></script>
+		<script src="/06_ThreeJS/js/Detector.js"></script>
+		<script src="/06_ThreeJS/js/libs/stats.min.js"></script>
+		<script src="/06_ThreeJS/js/libs/tween.min.js"></script>
+		<script type="text/javascript" src="d3/d3.js"></script>
+		<script src="https://d3js.org/d3-queue.v3.min.js"></script>
+		<style>
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				/*font-weight: bold;*/
+				text-align:center;
+			}
+
+			a {
+				color:#0078ff;
+			}
+
+			/*#info{
+				color: #fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}*/
+
+			#key{
+				color: #fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#hecho{
+				color: #fff;
+				position: absolute;
+				top: 30px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#actor{
+				color: #fff;
+				position: absolute;
+				top: 60px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#gender{
+				color: #fff;
+				position: absolute;
+				top: 90px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#race{
+				color: #fff;
+				position: absolute;
+				top: 120px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<!-- <div id="info">
+			Testing three js
+		</div> -->
+
+
+		<div id="key">
+			Sort by key
+		</div>
+
+		<div id="hecho">
+			Sort by param hecho
+		</div>
+
+		<div id="actor">
+			Sort by actor
+		</div>
+
+		<div id="gender">
+			Sort by gender
+		</div>
+
+		<div id="race">
+			Sort by race
+		</div>
+
+		
+		<script>
+
+			// #############################################################################
+			// ############################# GLOBAL VARIABLES ##############################
+			// #############################################################################
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var container, stats;
+			var camera, scene, renderer, particles, geometry, materials = [], colors = [], parameters, i, h, color, size;
+			var mouseX = 0, mouseY = 0;
+			// var actorBool = true;
+			// var keyBool, parametrosBool, ageBool, genderBool, personaBool, raceBool = false;
+
+			var viewSize, aspectRatio, myWidth, myHeight;
+
+			var needUpdate = false;
+
+			var tweenDuration = 2500;
+
+			// var myWidth = 1200;
+			// var myHeight = 1200;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			var rectSize = 2;
+			var rectSpacerW = rectSpacerH = 0;
+
+			var raycaster = new THREE.Raycaster();
+			var mouse = new THREE.Vector2();
+
+			// var myFileDataPath = "/06_ThreeJS/data/20k_test_W_sorts.csv";
+			// var myFileDataPath = "/06_ThreeJS/data/SmallTest200k.csv";
+			var myFileDataPath = "/06_ThreeJS/data/200k_opened.csv";
+
+			//Victims dataset
+			var datasetVictims = [];
+
+			//Run our script
+			parseMyFile(myFileDataPath);
+
+
+			// #############################################################################
+			// ###### Parses data and establishes queue to load data before viz is run #####
+			// #############################################################################
+
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			//!!!!!! NOTE NEED TO CLEAN THE DATA FILE AS SOME FIELDS ARE SPILLING OVER AND FORCING FIELDS OUT OF THEIR APPROPRIATE COLUMN, SEE GENDER
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+			function parseMyFile(myFileName) {
+				var q = d3.queue();
+				q.defer(function(callback) {
+					d3.csv(myFileName, function(res) {
+
+						//By default, csv loads all data as strings, here we parse the data into
+						//other data types
+						res.forEach(function(d,i) {
+							d.key = i;							//we also add a temporary key value
+							d.cod_persona = +d.cod_persona;
+							d.param_hecho = +d.param_hecho;
+							d.autor_guerrillas = +d.autor_guerrillas;
+							d.autor_paramilitares = +d.autor_paramilitares;
+							d.autor_fuerza_publica = +d.autor_fuerza_publica;
+							d.autor_bacrim = +d.autor_bacrim;
+							d.autor_otros = +d.autor_otros;
+							d.autor_no_identifica = +d.autor_no_identifica;
+
+							// d.Sorted_cod_persona = +d.Sorted_cod_persona;
+
+							//Reclassifying races
+							if (d.pert_etnica == "Negro(a) o Afrocolombiano(a)") {
+								d.pert_etnica = "Afrocolombian";
+							}
+							else if (d.pert_etnica == "Gitano(a) ROM") {
+								d.pert_etnica = "ROM";
+							}
+							else if (d.pert_etnica == "Indigena") {
+								d.pert_etnica = "Indigenous";
+							}
+							else if (d.pert_etnica == "Palenquero") {
+								d.pert_etnica = "Palenquero"
+							}
+							else if (d.pert_etnica == "Raizal del Archipielago de San Andres y Providencia") {
+								d.pert_etnica = "San Andres Providencia";
+							}
+							else {
+								d.pert_etnica = "None";
+							}
+
+							d.thisColor = [0,0,0];
+
+						});
+
+						//Passes data to the queue once we have loaded datat
+						callback(null, res);
+					});
+				});
+
+				//Now that data has loaded, execute rest of code
+				q.await(restOfCode);
+			};
+
+			// #############################################################################
+			// ################# AFTER DATA HAS LOADED, RUN THE REST #######################
+			// #############################################################################
+
+			function restOfCode(err, results) {
+
+				datasetVictims = results;
+
+				init();
+				animate();
+
+
+				var tempUpBound = datasetVictims.length;
+				// var tempUpBound = 50000;
+
+				// #############################################################
+				// ################# D3 div Click Events #######################
+				// #############################################################
+
+				//D3 to Handle click events on sorting our divs
+				d3.select("#key").on("click", function() {
+					console.log("You clicked the key!");
+					
+					// keyBool = true;
+					// personaBool = parametrosBool = ageBool = genderBool = actorBool = raceBool = false;
+
+					needUpdate = true;
+
+					var scParticles = scene.children[0].geometry;
+
+					//Maybe I can create one tween to eventually handle all of these
+					for (i = 0; i < tempUpBound; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						// var tempIndex = tempUpBound - thisDataPt.key;
+
+						var newXY = getXYCoordinates(thisDataPt.key, myWidth, myHeight);
+
+						scParticles.vertices[i].x = newXY[0];
+						scParticles.vertices[i].y = newXY[1];
+
+						// myTween = new TWEEN.Tween(scPartVerts[i])
+						// 	.to( {
+						// 		x: newXY[0],
+						// 		y: newXY[1]
+						// 	}, tweenDuration)
+						// 	// .easing( TWEEN.Easing.Cubic.InOut)
+						// 	.start();
+
+						scParticles.colors[i] = colorKey(thisDataPt);
+					}
+
+					//Careful with this, might be triggering done incorrectly if there are many tweens being created, not sure which tween is triggering complete, hopefully the last one
+					// myTween.onComplete(function() {
+					// 	console.log("done!");
+					// 	needsUpdate = false;
+					// });
+
+				});
+
+				
+				d3.select("#hecho").on("click", function() {
+					console.log("You clicked the hecho!");
+					
+					// keyBool = true;
+					// personaBool = parametrosBool = ageBool = genderBool = actorBool = raceBool = false;
+
+					needUpdate = true;
+
+					var scParticles = scene.children[0].geometry;
+
+					//Maybe I can create one tween to eventually handle all of these
+					for (i = 0; i < tempUpBound; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						// // WOULD UPDATE THIS TO HAVE this dataPoint.hechoIndex
+						// var newXY = getXYCoordinates(tempIndex, myWidth, myHeight);
+
+						// scParticles.vertices[i].x = newXY[0];
+						// scParticles.vertices[i].y = newXY[1];
+
+						// myTween = new TWEEN.Tween(scPartVerts[i])
+						// 	.to( {
+						// 		x: newXY[0],
+						// 		y: newXY[1]
+						// 	}, tweenDuration)
+						// 	// .easing( TWEEN.Easing.Cubic.InOut)
+						// 	.start();
+
+						scParticles.colors[i] = colorHecho(thisDataPt);
+					}
+
+					//Careful with this, might be triggering done incorrectly if there are many tweens being created, not sure which tween is triggering complete, hopefully the last one
+					// myTween.onComplete(function() {
+					// 	console.log("done!");
+					// 	needsUpdate = false;
+					// });
+
+				});
+
+				d3.select("#actor").on("click", function() {
+					console.log("You clicked actor!");
+
+					// actorBool = true;
+					// keyBool = parametrosBool = ageBool = genderBool = personaBool = raceBool = false;
+
+					needUpdate = true;
+
+					var scParticles = scene.children[0].geometry;
+
+
+					//Maybe I can create one tween to eventually handle all of these
+					for (i = 0; i < tempUpBound; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						var tempIndex = thisDataPt.key;
+
+						var newXY = getXYCoordinates(tempIndex, myWidth, myHeight);
+
+						scParticles.vertices[i].x = newXY[0];
+						scParticles.vertices[i].y = newXY[1];
+
+						// myTween = new TWEEN.Tween(scPartVerts[i])
+						// 	.to( {
+						// 		x: newXY[0],
+						// 		y: newXY[1]
+						// 	}, tweenDuration)
+						// 	// .easing( TWEEN.Easing.Cubic.InOut)
+						// 	.start();
+
+						scParticles.colors[i] = colorActor(thisDataPt);
+
+					}
+
+					// //Careful with this, might be triggering done incorrectly if there are many tweens being created, not sure which tween is triggering complete, hopefully the last one
+					// myTween.onComplete(function() {
+					// 	console.log("done!");
+					// 	needsUpdate = false;
+					// });
+				});
+
+				d3.select("#gender").on("click", function() {
+					console.log("You clicked the gender!");
+					
+					// keyBool = true;
+					// personaBool = parametrosBool = ageBool = genderBool = actorBool = raceBool = false;
+
+					needUpdate = true;
+
+					var scParticles = scene.children[0].geometry;
+
+					//Maybe I can create one tween to eventually handle all of these
+					for (i = 0; i < tempUpBound; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						// // WOULD UPDATE THIS TO HAVE this dataPoint.genderIndex
+						// var newXY = getXYCoordinates(tempIndex, myWidth, myHeight);
+
+						// scParticles.vertices[i].x = newXY[0];
+						// scParticles.vertices[i].y = newXY[1];
+
+						// myTween = new TWEEN.Tween(scPartVerts[i])
+						// 	.to( {
+						// 		x: newXY[0],
+						// 		y: newXY[1]
+						// 	}, tweenDuration)
+						// 	// .easing( TWEEN.Easing.Cubic.InOut)
+						// 	.start();
+
+						scParticles.colors[i] = colorGender(thisDataPt);
+					}
+
+					//Careful with this, might be triggering done incorrectly if there are many tweens being created, not sure which tween is triggering complete, hopefully the last one
+					// myTween.onComplete(function() {
+					// 	console.log("done!");
+					// 	needsUpdate = false;
+					// });
+
+				});
+
+				d3.select("#race").on("click", function() {
+					console.log("You clicked the race!");
+					
+					// keyBool = true;
+					// personaBool = parametrosBool = ageBool = genderBool = actorBool = raceBool = false;
+
+					needUpdate = true;
+
+					var scParticles = scene.children[0].geometry;
+
+					//Maybe I can create one tween to eventually handle all of these
+					for (i = 0; i < tempUpBound; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						// // WOULD UPDATE THIS TO HAVE this dataPoint.raceIndex
+						// var newXY = getXYCoordinates(tempIndex, myWidth, myHeight);
+
+						// scParticles.vertices[i].x = newXY[0];
+						// scParticles.vertices[i].y = newXY[1];
+
+						// myTween = new TWEEN.Tween(scPartVerts[i])
+						// 	.to( {
+						// 		x: newXY[0],
+						// 		y: newXY[1]
+						// 	}, tweenDuration)
+						// 	// .easing( TWEEN.Easing.Cubic.InOut)
+						// 	.start();
+
+						scParticles.colors[i] = colorRace(thisDataPt);
+					}
+
+					//Careful with this, might be triggering done incorrectly if there are many tweens being created, not sure which tween is triggering complete, hopefully the last one
+					// myTween.onComplete(function() {
+					// 	console.log("done!");
+					// 	needsUpdate = false;
+					// });
+
+				});
+
+			}
+
+			// #############################################################################
+			// ##################### THREE JS INITIALIZATION ###############################
+			// #############################################################################
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				viewSize = 900;
+				aspectRatio = window.innerWidth / window.innerHeight;
+
+				myHeight = viewSize;
+				myWidth = viewSize*aspectRatio;
+
+				console.log(myWidth);
+
+				// camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
+				camera = new THREE.OrthographicCamera(-aspectRatio * viewSize / 2, aspectRatio * viewSize / 2, viewSize/2, viewSize/ -2, -100, 100);
+				camera.position.x = myWidth/2;
+				camera.position.y = myHeight/2;
+				camera.position.z = 1;
+
+
+				scene = new THREE.Scene();
+				// scene.fog = new THREE.FogExp2( 0x000000, 0.0007 );
+
+
+				geometry = new THREE.Geometry();
+
+				for ( i = 0; i < datasetVictims.length; i ++ ) {
+					thisDataPt = datasetVictims[i];
+
+					var vertex = new THREE.Vector3();
+					var xyCoord = getXYCoordinates(thisDataPt.key, myWidth, myHeight);
+					vertex.x = xyCoord[0];
+					vertex.y = xyCoord[1];
+					vertex.z = 0.0001*i;
+
+					geometry.vertices.push( vertex );
+
+					// var thisColor = colorActor(thisDataPt);
+					// var thisColor = colorHecho(thisDataPt);
+					// var thisColor = colorGender(thisDataPt);
+					// var thisColor = colorRace(thisDataPt);
+					// colors[i] = new THREE.Color(thisColor);
+
+					colors[i] = colorKey(thisDataPt);
+				}
+
+				geometry.colors = colors;
+
+				material = new THREE.PointsMaterial({size: rectSize, sizeAttenuation: false, vertexColors: THREE.VertexColors});
+
+				particles = new THREE.Points(geometry, material);
+				scene.add(particles);
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+				// document.addEventListener( 'mousedown', onDocumentMouseDown, false);
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			// #############################################################################
+			// ######################## THREE JS DOCUMENT EVENTS ###########################
+			// #############################################################################
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onDocumentMouseMove( event ) {
+
+				// mouseX = event.clientX - windowHalfX;
+				// mouseY = event.clientY - windowHalfY;
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+			}
+
+			function onDocumentTouchStart( event ) {
+
+				if ( event.touches.length === 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			function onDocumentTouchMove( event ) {
+
+				if ( event.touches.length === 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			// function onDocumentMouseDown( event ) {
+			// 	event.preventDefault();
+
+			// 	var thismousex = (event.clientX / renderer.domElement.clientWidth) * 2 -1;
+			// 	var thismousey = -(event.clientY / renderer.domElement.clientHeight) * 2 +1;
+
+			// 	console.log(thismousex, thismousey);
+			// }
+
+			// #############################################################################
+			// ############################ COLOR FUNCTIONS ###############################
+			// #############################################################################
+
+			function colorKey (_thisDataPt) {
+				var gradientLength = 255;
+
+				return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
+			}
+
+			function colorHecho (_thisDataPt) {
+				var _color1 = new THREE.Color("rgb(24, 100, 90)");
+				var _color2 = new THREE.Color("rgb(169, 100, 90)");
+				var _color3 = new THREE.Color("rgb(211, 200, 82)");
+				var _color4 = new THREE.Color("rgb(0, 0, 35)");
+
+				if(_thisDataPt.param_hecho == 5) {
+					return _color1;
+				}
+				else if(_thisDataPt.param_hecho == 6) {
+					return _color2;
+				}
+				else if(_thisDataPt.param_hecho == 2) {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}
+			}
+
+			function colorActor (_thisDataPt) {
+				var _color1 = new THREE.Color("rgb(250, 100, 100)");
+				var _color2 = new THREE.Color("rgb(20, 160, 190)");
+				var _color3 = new THREE.Color("rgb(90, 140, 250)");
+				var _color4 = new THREE.Color("rgb(200, 160, 80)");
+
+				if (_thisDataPt.autor_guerrillas == 1) {
+					return _color1;
+				}
+				else if(_thisDataPt.autor_paramilitares == 1) {
+					return _color2;
+				}
+				else if(_thisDataPt.autor_fuerza_publica == 1) {
+					return _color3;
+				} 
+				else {
+					return _color4;
+				}
+			}
+
+			function colorGender (_thisDataPt) {
+				//Might need ot change for large or small city
+
+				var _color1 = new THREE.Color("rgb(318, 82, 88)");
+				var _color2 = new THREE.Color("rgb(78, 82, 88)");
+				var _color3 = new THREE.Color("rgb(198, 82, 88)");
+				var _color4 = new THREE.Color("rgb(70, 30, 35)");
+
+				if(_thisDataPt.genero_hom == "Mujer") {
+					return _color1;
+				}
+				else if(_thisDataPt.genero_hom == "Female") {
+					return _color2;
+				}
+				else if(_thisDataPt.genero_hom == "No Informa") {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}
+			}
+
+			function colorRace (_thisDataPt) {
+				var _color1 = new THREE.Color("rgb(150, 75, 70)");
+				var _color2 = new THREE.Color("rgb(39, 75, 100)");
+				var _color3 = new THREE.Color("rgb(279, 75, 75)");
+				var _color4 = new THREE.Color("rgb(90, 90, 35)");
+
+				if(_thisDataPt.pert_etnica == "None") {
+					return _color1;
+				}
+				else if(_thisDataPt.pert_etnica == "Afrocolombian") {
+					return _color2;
+				}
+				else if(_thisDataPt.pert_etnica == "Indigenous") {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}	
+			}
+
+			// #############################################################################
+			// ##################### THREE JS ANIMATION  AND RENDER ########################
+			// #############################################################################
+
+			function animate() {
+
+				// requestAnimationFrame( animate );
+
+				setTimeout( function() {
+					requestAnimationFrame( animate );
+				}, 1000/ 30 );
+
+				render();
+				stats.update();
+
+			}
+
+			function render() {
+
+				//update the pickring ray with the camera and mouse position
+				raycaster.setFromCamera(mouse, camera);
+
+				//calc obj intersecting pick ray
+				var intersects = raycaster.intersectObjects(scene.children);
+
+				for ( var i = 0; i < intersects.length; i++ ) {
+
+					intersects[ i ].object.material.color.set( 0xff0000 );
+				
+				}
+
+				// // For tween
+				// if(needUpdate) {
+				// 	scene.children[0].geometry.verticesNeedUpdate = true;
+				// 	TWEEN.update();
+				// }
+
+				// For Jumping to new values
+				if(needUpdate) {
+					scene.children[0].geometry.verticesNeedUpdate = true;
+					scene.children[0].geometry.colorsNeedUpdate = true;
+					needUpdate = !needUpdate;
+				}
+
+				renderer.render( scene, camera );
+
+			}
+
+			//Given an index return the x coordinate in the array
+			function getXYCoordinates(_thisIndex, _width, _height) {
+					var myList = [];
+
+					myList[0] = parseInt((_thisIndex*(rectSize+rectSpacerW))%_width);
+					myList[1] = parseInt(_thisIndex*(rectSize+rectSpacerH)*(rectSize+rectSpacerW)/_width);
+
+					return myList;
+			}
+
+			// //Function to handle multiple tweens taken from https://github.com/tweenjs/tween.js/issues/229
+			// function MultiTween(objects) {
+			// 	var _tweens = [];
+
+			// 	objects.forEach(function(object) {
+			// 		_tweens.push(new Tween(object));
+			// 	});
+
+			// 	this.to = function(destination, duration) {
+			// 		_tweens.forEach(function(tween) {
+			// 	  		tween.to(destination, duration);
+			// 		});
+			// 	};
+
+			// 	this.easing = function(easing) {
+			// 		_tweens.forEach(function(tween) {
+			// 	  		tween.easing(easing);
+			// 		});
+			// 	};
+
+			// 	this.start = function() {
+			// 		_tweens.forEach(function(tween) {
+			// 	  		tween.start();
+			// 		});
+			// 	};
+			// }
+
+
+
+		</script>
+	</body>
+</html>
