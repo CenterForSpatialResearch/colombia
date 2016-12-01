@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Center for Spatial Research: Colombia Victims</title>
+		<script type="text/javascript" src="d3/d3.js"></script>
+		<script src="https://d3js.org/d3-queue.v3.min.js"></script>
+		<style type="text/css">
+			
+			rect:hover {
+				fill: orange;
+			}
+			
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 16px;
+				line-height: 20px;
+			}
+
+		</style>
+	</head>
+	<body>
+		
+		<p id="key">Sort key</p>
+		<p id="persona">Sort  cod_persona</p>
+		<p id="hecho">Sort param_hecho</p>
+		<p id="actor">Sort by actor</p>
+		<p id="gender">Sort by gender</p>
+		<p id="race">Sort by race</p>
+
+		<div id="tooltip" class="hidden">
+			<p><strong><span id="header">Data Read Out Test</span></strong></p>
+			<p><span id="value">100</span></p>
+		</div>
+
+		<script type="text/javascript">
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			// Establish globl parameters and parse data
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			//Define width and height of svg canvas
+			var w = 1000;
+			var h = 1200;
+
+			//Establish data variable at this top level so we can query data from the browser console
+			var datasetVictims = [];
+
+			//File path to data
+			myFileDataPath = "/04_D3Experiments/data/8k_test.csv";
+			// myFileDataPath = "/04_D3Experiments/data/20k_test.csv";
+
+			//Tool tip headers
+			var tooltipHeader = "Header";
+			var tooltipText = "Values";
+
+			//Category selectors
+			var keyBool = true;
+			var personaBool = false;
+			var parametros = false;
+			// var age = false;
+			var gender = false;
+			var actor = false;
+			var race =false;
+
+			//Run our script
+			parseMyFile(myFileDataPath);
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			// Parses our data file and establishes a queue so data is loaded before viz is run
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			//!!!!!! NOTE NEED TO CLEAN THE DATA FILE AS SOME FIELDS ARE SPILLING OVER AND FORCING FIELDS OUT OF THEIR APPROPRIATE COLUMN, SEE GENDER
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+			function parseMyFile(myFileName) {
+				var q = d3.queue();
+				q.defer(function(callback) {
+					d3.csv(myFileName, function(res) {
+
+						//By default, csv loads all data as strings, here we parse the data into
+						//other data types
+						res.forEach(function(d,i) {
+							d.key = i;							//we also add a temporary key value
+							d.cod_persona = +d.cod_persona;
+							d.param_hecho = +d.param_hecho;
+							d.autor_guerrillas = +d.autor_guerrillas;
+							d.autor_paramilitares = +d.autor_paramilitares;
+							d.autor_fuerza_publica = +d.autor_fuerza_publica;
+							d.autor_bacrim = +d.autor_bacrim;
+							d.autor_otros = +d.autor_otros;
+							d.autor_no_identifica = +d.autor_no_identifica;
+
+							//Reclassifying races
+							if (d.pert_etnica == "Negro(a) o Afrocolombiano(a)") {
+								d.pert_etnica = "Afrocolombian";
+							}
+							else if (d.pert_etnica == "Gitano(a) ROM") {
+								d.pert_etnica = "ROM";
+							}
+							else if (d.pert_etnica == "Indigena") {
+								d.pert_etnica = "Indigenous";
+							}
+							else if (d.pert_etnica == "Palenquero") {
+								d.pert_etnica = "Palenquero"
+							}
+							else if (d.pert_etnica == "Raizal del Archipielago de San Andres y Providencia") {
+								d.pert_etnica = "San Andres Providencia";
+							}
+							else {
+								d.pert_etnica = "None";
+							}
+
+						});
+
+						//Passes data to the queue once we have loaded datat
+						callback(null, res);
+					});
+				});
+
+				//Now that data has loaded, execute rest of code
+				q.await(restOfCode);
+			};
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			// The viz, we run after data is loaded
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			function restOfCode(err, results) {
+				
+				datasetVictims = results;
+
+
+
+				//Our colors
+				// var color1, color2, color3, color4;
+
+				// Define rectangle height and width
+				var rectWidth =  rectHeight = 4;
+				var rectSpacerW = rectSpacerH = 0;
+
+				//Transition variables
+				var onClickTransTime = 2000;
+				// var onClickEaseType = "linear";
+				// var randomMaxInt = 50;
+
+				
+				//Create SVG element
+				var svg = d3.select("body")
+							.append("svg")
+							.attr("width", w)
+							.attr("height", h);
+
+				//Create rectangles
+				svg.selectAll("rect")
+				   .data(datasetVictims)
+				   .enter()
+				   .append("rect")
+				   .attr("x", function(d, i) {
+				   		// return xScale(i);
+				   		return (i*(rectWidth+rectSpacerW))%w;
+				   })
+				   .attr("y", function(d, i) {
+				   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+				   })
+				   // .attr("width", xScale.rangeBand())
+				   .attr("width", rectWidth)
+				   .attr("height", rectHeight)
+				   .attr("fill", function(d, i) {
+						// return "rgb(0, 0, " + (d.param_hecho * 40) + ")";
+						return "rgb(0,0, " + i%200 + ")";
+				   })
+				   // 	.on("click", function() {
+				   // 		sortByPersona();
+				   // })
+	   			   .on("mouseover", function(d) {
+
+						//Get this rectangle's x/y values, then augment for the tooltip
+						var xPosition = parseFloat(d3.select(this).attr("x"));
+						var yPosition = parseFloat(d3.select(this).attr("y"));
+
+						//Determine which text to display
+						// var tooltipText = "key: " + d.key + ", cod_persona: " + d.cod_persona + ", param_hecho: " + d.param_hecho + ", gender: " + d.genero_hom + ", race: " + d.pert_etnica
+						if (keyBool) {
+							tooltipHeader = "Key Value";
+							tooltipText = d.key;
+						}
+						else if (personaBool) {
+							tooltipHeader = "Cod_Persona Value";
+							tooltipText = d.cod_persona;
+						} else if (parametros) {
+							tooltipHeader = "Param_hecho Value";
+							tooltipText = d.param_hecho;
+						} else if (gender) {
+							tooltipHeader = "Gender Value";
+							tooltipText = d.genero_hom;
+						} else if (race) {
+							tooltipHeader = "Race Value";
+							tooltipText = d.pert_etnica;
+						} else if (actor) {
+							tooltipHeader = "Actor Value";
+							tooltipText = "Geurillas: "+ d.autor_guerrillas + ", Paramil: " + d.autor_paramilitares + ", fuerza: " +  d.autor_fuerza_publica + ", bacrim: " + d.autor_bacrim + ", other: " + d.autor_otros;
+						} else {
+							tooltipHeader = "None selected";
+							tooltipText = "N/A";
+						}
+
+						//Update the tooltip position and value
+						d3.select("#tooltip")
+							.style("left", xPosition + 30 + "px")
+							.style("top", yPosition + 150 + "px")						
+							.select("#value")
+							.text(tooltipText);
+						d3.select("#tooltip")
+							.select("#header")
+							.text(tooltipHeader);
+				   
+						//Show the tooltip
+						d3.select("#tooltip").classed("hidden", false);
+
+				   })
+				   .on("mouseout", function() {
+				   
+						//Hide the tooltip
+						d3.select("#tooltip").classed("hidden", true);
+						
+				   });
+
+				   // *******************************************************
+				   // ****************** Sorting functions ****************** 
+				   // *******************************************************
+
+   					// ================ SORT BY KEY ================
+					d3.select("#key").on("click", function() {
+						sortByKey();
+
+						//Update category
+						keyBool = true;
+						personaBool = false;
+						parametros = false;
+						// age = false;
+						gender = false;
+						actor = false;
+						race =false;
+					});
+
+					var sortByKey = function() {
+
+						svg.selectAll("rect")
+						   .sort(function(a, b) {
+							   return d3.ascending(a.key, b.key);
+						   	})
+						   .transition()
+						   .duration(onClickTransTime)
+						   .attr("x", function(d, i) {
+						   		return (i*(rectWidth+rectSpacerW))%w;
+						   })
+						   .attr("y", function(d, i) {
+						   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+						   })
+						   .attr("fill", function(d, i) {
+								return "rgb(0,0, " + i%200 + ")";
+						   });
+
+					};	
+
+				   //  ================ SORT BY COD_PERSONA ================
+				   d3.select("#persona").on("click", function() {
+				   		sortByPersona();
+
+						//Update category
+						keyBool = false;
+						personaBool = true;
+						parametros = false;
+						//age = false;
+						gender = false;
+						actor = false;
+						race =false;
+				   });
+
+					var sortByPersona = function() {
+
+						svg.selectAll("rect")
+						   .sort(function(a, b) {
+							   return d3.ascending(a.cod_persona, b.cod_persona);
+						   	})
+						   .transition()
+						   .duration(onClickTransTime)
+						   .attr("x", function(d, i) {
+						   		return (i*(rectWidth+rectSpacerW))%w;
+						   })
+						   .attr("y", function(d, i) {
+						   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+						   })
+						   .attr("fill", function(d, i) {
+								return "rgb(0, " + i%100 + ",0)";
+				   			});
+
+					};	
+
+
+					// ================ SORT BY PARAM_HECHO ================
+					d3.select("#hecho").on("click", function() {
+						sortByHecho();
+
+						//Update category
+						keyBool = false;
+						personaBool = false;
+						parametros = true;
+						//age = false;
+						gender = false;
+						actor = false;
+						race =false;
+					});
+
+					var color1 = "rgb(24, 100, 90)";
+					var color2 = "rgb(169, 100, 90)";
+					var color3 = "rgb(211, 200, 82)";
+					var color4 = "rgb(0, 0, 35)";
+
+					var sortByHecho = function() {
+
+						svg.selectAll("rect")
+						   .sort(function(a, b) {
+							   return d3.ascending(a.param_hecho, b.param_hecho);
+						   	})
+						   .transition()
+						   .duration(onClickTransTime)
+						   .attr("x", function(d, i) {
+						   		return (i*(rectWidth+rectSpacerW))%w;
+						   })
+						   .attr("y", function(d, i) {
+						   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+						   })
+						   .attr("fill", function(d) {
+								// return "rgb(0,0, " + i%200 + ")";
+								if(d.param_hecho == 5) {
+									return color1;
+								}
+								else if(d.param_hecho == 6) {
+									return color2;
+								}
+								else if(d.param_hecho == 2) {
+									return color3;
+								}
+								else {
+									return color4;
+								}
+						   });
+					};	
+
+					// ================ SORT BY AUTOR / ACTOR ================
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEED TO FIGURE OUT HOW TO SORT BY MULITPLE FIELDS!!! !!!!!!!!!!!!!!!!
+					// HOW TO DEAL WITH MULTIPLE ACTORS....
+
+					d3.select("#actor").on("click", function() {
+						sortByActor();
+
+						//Update category
+						keyBool = false;
+						personaBool = false;
+						parametros = false;
+						//age = false;
+						gender = false;
+						actor = true;
+						race =false;
+					});
+
+					var color1 = "rgb(318, 82, 88)";
+					var color2 = "rgb(78, 82, 88)";
+					var color3 = "rgb(198, 82, 88)";
+					var color4 = "rgb(0, 0, 35)";
+
+					var sortByActor = function() {
+
+						svg.selectAll("rect")
+						   .sort(function(a, b) {
+							   return d3.ascending(a.autor_paramilitares, b.autor_paramilitares);
+						   	})
+						   .transition()
+						   .duration(onClickTransTime)
+						   .attr("x", function(d, i) {
+						   		return (i*(rectWidth+rectSpacerW))%w;
+						   })
+						   .attr("y", function(d, i) {
+						   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+						   })
+						   .attr("fill", function(d) {
+								// return "rgb(0,0, " + i%200 + ")";
+								if(d.autor_guerrillas == 1) {
+									return color1;
+								}
+								else if(d.autor_paramilitares == 1) {
+									return color2;
+								}
+								else if(d.autor_fuerza_publica == 1) {
+									return color3;
+								}
+								else {
+									return color4;
+								}
+						   });
+					};
+
+					// ================ SORT BY GENDER ================
+					d3.select("#gender").on("click", function() {
+						sortByGender();
+
+						//Update category
+						keyBool = false;
+						personaBool = false;
+						parametros = false;
+						//age = false;
+						gender = true;
+						actor = false;
+						race =false;
+					});
+
+					// !!!!!!!!!!!!!! NOTE THAT I'M NOT SURE ABOUT THESE COLOR VALUES, THEY MIGHT BE NEED TO BE SWITCHED FOR GENDER AND CHANGE FOR LARGE VS SMALL CITIES
+					var color1 = "rgb(318, 82, 88)";
+					var color2 = "rgb(78, 82, 88)";
+					var color3 = "rgb(198, 82, 88)";
+					var color4 = "rgb(0, 0, 35)";	
+
+					var sortByGender = function() {
+
+						svg.selectAll("rect")
+						   .sort(function(a, b) {
+							   return d3.ascending(a.genero_hom, b.genero_hom);
+						   	})
+						   .transition()
+						   .duration(onClickTransTime)
+						   .attr("x", function(d, i) {
+						   		return (i*(rectWidth+rectSpacerW))%w;
+						   })
+						   .attr("y", function(d, i) {
+						   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+						   })
+						   .attr("fill", function(d) {
+								// return "rgb(0,0, " + i%200 + ")";
+								if(d.genero_hom == "Mujer") {
+									return color1;
+								}
+								else if(d.genero_hom == "Female") {
+									return color2;
+								}
+								else if(d.genero_hom == "No Informa") {
+									return color3;
+								}
+								else {
+									return color4;
+								}
+						   });
+					};
+
+					// ================ SORT BY RACE ================
+					d3.select("#race").on("click", function() {
+						sortByRace();
+
+						//Update category
+						keyBool = false;
+						personaBool = false;
+						parametros = false;
+						//age = false;
+						gender = false;
+						actor = false;
+						race = true;
+					});
+
+					var color1 = "rgb150, 75, 70)";
+					var color2 = "rgb(39, 75, 100)";
+					var color3 = "rgb(279, 75, 75)";
+					var color4 = "rgb(0, 0, 35)";	
+
+					var sortByRace = function() {
+
+						svg.selectAll("rect")
+						   .sort(function(a, b) {
+							   return d3.ascending(a.pert_etnica, b.pert_etnica);
+						   	})
+						   .transition()
+						   .duration(onClickTransTime)
+						   .attr("x", function(d, i) {
+						   		return (i*(rectWidth+rectSpacerW))%w;
+						   })
+						   .attr("y", function(d, i) {
+						   		return i*(rectHeight+rectSpacerH)*((rectWidth+rectSpacerW)/w);
+						   })
+						   .attr("fill", function(d) {
+								// return "rgb(0,0, " + i%200 + ")";
+								if(d.pert_etnica == "None") {
+									return color1;
+								}
+								else if(d.pert_etnica == "Afrocolombian") {
+									return color2;
+								}
+								else if(d.pert_etnica == "Indigenous") {
+									return color3;
+								}
+								else {
+									return color4;
+								}
+						   });
+					};	
+
+				}
+
+				// //Create labels
+				// svg.selectAll("text")
+				//    .data(dataset)
+				//    .enter()
+				//    .append("text")
+				//    .text(function(d) {
+				//    		return d;
+				//    })
+				//    .attr("text-anchor", "middle")
+				//    .attr("x", function(d, i) {
+				//    		// return xScale(i) + xScale.rangeBand() / 2;
+				//    		return xScale(i) + xScale.bandwidth() / 2;
+				//    })
+				//    .attr("y", function(d) {
+				//    		return h - yScale(d) + 14;
+				//    })
+				//    .attr("font-family", "sans-serif")
+				//    .attr("font-size", "11px")
+				//    .attr("fill", "white");
+
+			   // //Add an event listener
+			   // d3.select("p")
+			   // 		.on("click", function () {
+			   			
+			   // 			// New values for dataset
+			   // 			// dataset = [ 11, 12, 15, 20, 18, 17, 16, 18, 23, 25,
+		       //              			// 5, 10, 13, 19, 21, 25, 22, 18, 15, 13 ];
+		       //  			//Random dataset instead
+		       //  			var numValues = dataset.length;
+		       //  			dataset = [];
+		       //  			for (var i = 0; i < numValues; i++) {
+		       //  				var newNumber = Math.floor(Math.random()*randomMaxInt);
+		       //  				dataset.push(newNumber);
+		       //  			};
+
+		       //  			//Update yScale domain
+		       //  			yScale.domain([0, d3.max(dataset)]);
+
+		       //  			//Update all the rectangles heights
+		       //  			svg.selectAll("rect")
+		       //  				.data(dataset)
+		       //  				.transition()
+		       //  				.delay(function(d, i) {
+		       //  					return i * 50;
+		       //  				})
+		       //  				.duration(onClickTransTime)
+		       //  				// .ease(onClickEaseType)
+		       //  				.attr("y", function(d) {
+		       //  					return h - yScale(d);
+		       //  				})
+		       //  				.attr("height", function(d) {
+		       //  					return yScale(d);
+		       //  				})
+		       //  				.attr("fill", function(d) {
+		       //  					return "rgb(0,0,"+(d*10)+")";
+		       //  				});
+
+		    			// 	//Update all the rectangles' labels
+		    			// 	svg.selectAll("text")
+		    			// 		.data(dataset)
+		    			// 		.transition()
+		    			// 		.delay(function(d, i) {
+		       //  					return i * 50;
+		       //  				})
+		    			// 		.duration(onClickTransTime)
+		    			// 		// .ease(onClickEaseType)
+		    			// 		.text(function(d){
+		    			// 			return d;
+		    			// 		})
+		    			// 		.attr("y", function(d){
+		    			// 			return h - yScale(d)+14;
+		    			// 		});
+
+				   		// });
+				
+			
+		</script>
+
+	</body>
+</html>
