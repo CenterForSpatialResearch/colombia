@@ -1,5 +1,3 @@
-/*jslint browser: true*/
-/*global Tangram, gui */
 
 function parseQuery (qstr) {
     var query = {};
@@ -104,47 +102,26 @@ map = (function () {
 
 }());
 
+//END OF MAPZEN CODE
 
 
 
-//map.addLayer(new L.TileLayer());
+var lookup={}
+//console.log(lookup);
 
+for (i = 0; i<csv.length; i++)
+{
+    lookup[csv[i][3]]=csv[i][0];
+}
 
 //USE D3 TO LOAD VECTORS AS SVG ELEMENTS
 
 
 
-function recolor(){
-    var paths = document.getElementsByTagName('path');
-    [].forEach.call(paths, function(test){
-        switch (test.getAttribute("direction")){
-            case "NW":
-                test.setAttribute("stroke","url(#NW)");
-                break;
-            case "NE":
-                test.setAttribute("stroke","url(#NE)");
-                break;
-            case "SE":
-               test.setAttribute("stroke","url(#SE)");
-               break;
-            case "SW":
-                test.setAttribute("stroke","url(#SW)");
-            }
-    });
-
-
-
-    [].forEach.call(icon, function(test){  
-        test.setAttribute("stroke","black");
-        console.log(test);
-    });
-}
-
 
 var svg = d3.select(map.getPanes().overlayPane).append("svg"),
     g = svg.append("g").attr("class", "leaflet-zoom-hide");
    
-
 
 d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
   if (error) throw error;
@@ -181,85 +158,57 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
             if (directionLat>0){
                 direction = "NE";
                 feature[0][i].setAttribute("direction", "NE");
+                feature[0][i].setAttribute("stroke","url(#NE)");
 
             }
             else{
                 direction = "SE";
                 feature[0][i].setAttribute("direction", "SE");
+                feature[0][i].setAttribute("stroke","url(#SE)");
             }
         }
         else{
             if (directionLat>0){
                 direction = "NW";
                 feature[0][i].setAttribute("direction", "NW");
+                feature[0][i].setAttribute("stroke","url(#NW)");
             }
             else{
                 direction = "SW";
                 feature[0][i].setAttribute("direction", "SW");
+                feature[0][i].setAttribute("stroke","url(#SW)");
             }
         }
 
 
         feature[0][i].setAttribute("class",collection.features[i].properties.DestMun.replace(/\s+/g, '-').replace(',',''));
+
+  
+   
         feature[0][i].setAttribute("stroke-width",getLineWeight(collection.features[i].properties.Count));
-        
-
-        switch (direction){
-            case "NW":
-                feature[0][i].setAttribute("stroke","url(#NW)");
-                break;
-            case "NE":
-                feature[0][i].setAttribute("stroke","url(#NE)");
-                break;
-            case "SE":
-               feature[0][i].setAttribute("stroke","url(#SE)");
-               break;
-            case "SW":
-                feature[0][i].setAttribute("stroke","url(#SW)");
-            }
-        
-
-        
         feature[0][i].setAttribute("destination",collection.features[i].properties.DestMun);
+
+        feature[0][i].setAttribute("origin",collection.features[i].properties.OrgMun.replace(/\s+/g, '-').replace(',',''));
+
+        //console.log(feature[0][i].getAttribute("origin"));
+
+
         feature[0][i].setAttribute("hide", "1");
 
-
-        // var newLine = document.createElement("line");
-        // newLine.setAttribute("id", i);
-        // newLine.setAttribute("x1", 100);
-        // newLine.setAttribute("y1", 150);
-        // newLine.setAttribute("x2", 800);
-        // newLine.setAttribute("y2", 1000);
-        // newLine.setAttribute("stroke", "black");
-        // newLine.setAttribute("stroke-width", 4);
-
-
-
-        // document.getElementById("test").appendChild(newLine);
-
-
-
-
-/*
-
-        if(collection.features[i].properties.DestMun=="BOGOTÁ, D.C.")
-        {
-            feature[0][i].setAttribute("stroke","url(#grad2)");
-            
-            //feature[0][i].setAttribute("stroke-width",20);
-            //console.log(feature[0][i]);
-        };
-       */
-        //console.log(feature[0][i]);
     }
+
+
+
 
 
 
   map.on("viewreset", reset);
   reset();
 
+
   // Reposition the SVG to cover the features.
   function reset() {
+      console.log("reset");
     var bounds = path.bounds(collection),
         topLeft = bounds[0],
         bottomRight = bounds[1];
@@ -272,10 +221,7 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
     g   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
 
     feature.attr("d", path);
-    feature.style.display='initial'
-    //feature.attr("stroke-width", 3);
-    
-    //feature.attr("opacity", 0);
+
   }
 
   // Use Leaflet to implement a D3 geometric transformation.
@@ -317,7 +263,7 @@ function getLineWeight(c) {
 
 
 var cities = [
-["BOGOTÁ D.C.", [4.65052840264, -74.105971599], 6376000],
+["BOGOTÁ D.C.", [4.65052840264, -74.105971599], 6376000,],
 ["SANTIAGO DE CALI", [3.417586541, -76.5223324663],2040000],
 ["MEDELLÍN", [6.24894080931, -75.577055625699899], 2184000],
 ["SANTA MARÍA", [2.93902635801, -75.586686826999895],383991],
@@ -349,12 +295,15 @@ var cities = [
 ];
 
 
+var citiesNoAccent=[
+"BOGOTA-DC","SANTIAGO-DE-CALI", "MEDELLIN", "SANTA-MARIA", "VALLEDUPAR","BUENAVENTURA","POPAYAN","SINCELEJO", "TUMACO","FLORENCIA","APARTADO","TURBO", "SAN-FRANCISCO-DE-QUIBDO", "CIENAGA-DE-ORO", "EL-CARMEN-DE-BOLIVAR", "SEGOVIA","TIBU","MITU", "RIOSUCIO", "SAN-PABLO","EL-CHARCO", "SAMANA", "ITUANGO", "INIRIDA","MUTATA", "SAN-LUIS","ARGELIA", "GRANADA", "RICAURTE-(COLOSO)"];
+
 
 
 var smallIcon = L.icon({
     iconUrl: 'icon.png',
     iconSize: [20, 23.75],
-    iconAnchor: [5.5, 23.5],
+    iconAnchor: [10, 23.5/2],
     popupAnchor: [-0.75, -16.5]
 });
 
@@ -362,7 +311,7 @@ var smallIcon = L.icon({
 var mediumIcon = L.icon({
     iconUrl: 'icon.png',
     iconSize: [30, 35.625],
-    iconAnchor: [5.5, 23.5],
+    iconAnchor: [15, 35.625/2],
     popupAnchor: [-0.75, -16.5]
 });
 
@@ -370,18 +319,9 @@ var mediumIcon = L.icon({
 var largeIcon = L.icon({
     iconUrl: 'icon.png',
     iconSize: [40, 47.5],
-    iconAnchor: [5.5, 23.5],
+    iconAnchor: [20, 47.5/2],
     popupAnchor: [-0.75, -16.5]
 });
-
-function getElement(name, index){
-
-    var path = "img/tree"+j+".jpg";
-    //console.log( "<div><img src='"+path+"'></div>");
-    
-    //return "<div ><p>"+name+"</p><img style='width:50px; height: 40px;' src='"+path+"'></div>";
-    return "<p>"+name+"</p><img style='width:50px; height: 40px;' src='"+path+"'>"
-};
 
 function chooseIcon(population){
    if (population<100000){
@@ -402,16 +342,14 @@ for (j=0; j<29; j++)
     var marker = L.marker(cities[j][1],
 
         {
-        // Make the icon dragable,     // Add a title
+
 
 
         icon: chooseIcon(cities[j][2]),
-        opacity: 1,
-        riseOnHover: true} 
-                   // Adjust the opacity
+        opacity: 1} 
+ 
         )
-        //.bindPopup(getElement(cities[j][0],j))
-        //s.on('click', markerClick)
+       
         .addTo(map);
 
     var icon = document.getElementsByClassName("leaflet-marker-icon")[j];
@@ -421,78 +359,107 @@ for (j=0; j<29; j++)
     
 };
 
-//cities[j][0]
+
 var lastClicked=0;
 function markerClick(city){
     
     var mapDiv = document.getElementById("console");
-    console.log(mapDiv);
-    var stats = document.getElementById('stats')
-    if (stats)
-    {
-        $("#console").animate({
-            height: '-=50px'
-        }, 600);
-        mapDiv.removeChild(stats);
-
-    }
-
-
 
     var paths = document.getElementsByTagName('path');
        [].forEach.call(paths, function(test){
-           //$(test).fadeTo(100,1)
-           //test.setAttribute("opacity", 1);
+  
            test.setAttribute("hide","1");
-          // console.log("hello");
+
        });
 
 
 
     
-    var icon  = document.getElementsByClassName(city);
+    var icon  = Array.prototype.slice.call(document.getElementsByClassName(city));
+    console.log(icon);
+
+    
     lastClicked=city;
-    console.log(lastClicked);
+
     [].forEach.call(icon, function(test){  
-        console.log(test.nodeName)
+
         test.setAttribute("hide","0");
-        //test.setAttribute("opacity", 1);
-        $(test).fadeTo(1000,1);
-        //console.log(test);
+        test.setAttribute("display", 'block');
+
     });
+
+
+
+
+
+
+
+
 
     var paths = document.getElementsByTagName('path');
     [].forEach.call(paths, function(test){
         if(test.getAttribute("hide")>0){
 
-            $(test).fadeTo(1000,0);
-            //test.setAttribute("opacity",0);
+            //$(test).fadeTo(1000,0);
+            test.setAttribute("display",'none');
         };
     });
     
     
     
 
-    var info = document.createElement("DIV");
-    info.innerHTML=getElement(city,1);
-    info.setAttribute("id","stats");
-    info.style.position="absolute";
-    info.style.width="100px";
-    info.style.height="100px";
-    info.style.float="right";
-    info.style.marginLeft="20px";
-    info.style.display="inline-block";
-
-    console.log(info);
- 
-            $("#console").animate({
-                height: '+=50px'
-            }, 600);
+    var info = document.getElementById("image");
 
 
+    // while (info.hasChildNodes()) {
+    //     info.removeChild(info.firstChild);
+    // }
 
-    mapDiv.appendChild(info);
-    console.log(mapDiv);
+    var city_space = city.replace(/-/g,' ');
+    console.log(city);
+
+
+    for (i = 0;i<cities.length; i++)
+    {
+        if (city.replace(/-/g,' ') ==cities[i][0]){
+
+            $('#image').fadeTo(400,0);
+            info.innerHTML='<br>';
+           
+            info.innerHTML="<img src=img/"+citiesNoAccent[i]+".jpg>";
+            info.style.display='block';
+            $('#image').fadeTo(400,1);
+            break;
+        }else if (i==cities.length-1){
+            $('#image').fadeTo(400,0);
+            info.style.display='none';
+        }
+    }
+    $('#title').html(city);
+
+
+
+    //info.innerHTML=getElement(city_space,1);
+
+
+
+    mapDiv.style.visibility="visible";
+    //mapDiv.style.opacity=1;
+    $("#desplazados").animate({'width':''+csv[lookup[city_space]][11]/5000+"px"});
+    document.getElementById("dtext").innerHTML=""+ csv[lookup[city_space]][11] +" Desplazados";
+
+
+    $("#refugiados").animate({'width':''+csv[lookup[city_space]][12]/5000+"px"});
+    document.getElementById("rtext").innerHTML=""+ csv[lookup[city_space]][12] +" Refugiados";
+
+
+    $("#ipc").animate({'width':''+csv[lookup[city_space]][13]/5000+"px"});
+    document.getElementById("itext").innerHTML=""+ csv[lookup[city_space]][11] +" ICP's";
+    $(mapDiv).fadeTo(1000,1)
+    // $('.console').css('opacity','1');
+
+    //mapDiv.appendChild(info);
+    //console.log(mapDiv);
     
 
     
@@ -508,37 +475,26 @@ function getCity(index){
 $(document).click(function(event){
 
 
-            //     var paths = document.getElementsByTagName('path');
-            //     [].forEach.call(paths, function(test){
-            //         //test.style.display="initial";
-            //         console.log("hello");
-            //     });
-            // });
-
     if (event.target.classList.item(3)!=lastClicked){
 
         var mapDiv = document.getElementById("console");
-        console.log(mapDiv);
 
-        $("#console").animate({
-            height: '-=50px'
-        }, 600);
-        var stats = document.getElementById('stats')
-        if (stats)
-        {
-            mapDiv.removeChild(stats);
-        }
-
-
-
-        console.log(event.target.classList.item(3));
         var paths = document.getElementsByTagName('path');
            [].forEach.call(paths, function(test){
-               $(test).fadeTo(1000,1)
-               //test.setAttribute("opacity", 1);
+               //$(test).fadeTo(1000,1)
+               test.setAttribute("display", 'block');
                test.setAttribute("hide","1");
-               console.log("hello");
+               //console.log("hello");
            });
+           setTimeout(function(){
+               //do what you need here
+           }, 1000);
+           $(mapDiv).fadeTo(1000,0);
     }
     
 });
+
+
+
+
+
