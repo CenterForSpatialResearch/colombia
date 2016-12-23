@@ -38,11 +38,17 @@ map = (function () {
     }
     /*** Map ***/
 
+    // var boundingBox = L.latLngBounds( 
+    //     L.latLng({lat: -78, lng:10}) ,
+    //     L.latLng({lat: -72, lng :0}) 
+    // );
+
     var map = L.map('map', {
         "keyboardZoomOffset" : 1.,
-        "minZoom" : 0,
+        "minZoom" : 6,
         "maxZoom" : 15,
         "zoomControl" : true,
+        //"bounds" : boundingBox,
         }
     );
     //map._initPathRoot();
@@ -102,6 +108,8 @@ map = (function () {
 
 }());
 
+
+map.setMaxBounds([[14, -65], [-2,-85]]);
 //END OF MAPZEN CODE
 
 
@@ -123,7 +131,7 @@ var svg = d3.select(map.getPanes().overlayPane).append("svg"),
     g = svg.append("g").attr("class", "leaflet-zoom-hide");
    
 
-d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
+d3.json("DisplacementLargeEdited_200+.geojson", function(error, collection) {
   if (error) throw error;
 
   var transform = d3.geo.transform({point: projectPoint}),
@@ -142,10 +150,7 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
   
 
     for (i=0; i<collection.features.length;i++)
-
-
     {
-
         var direction
         //POS = south
         var directionLon = collection.features[i].properties.OrgLon-collection.features[i].properties.DestLon;
@@ -159,7 +164,6 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
                 direction = "NE";
                 feature[0][i].setAttribute("direction", "NE");
                 feature[0][i].setAttribute("stroke","url(#NE)");
-
             }
             else{
                 direction = "SE";
@@ -180,34 +184,23 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
             }
         }
 
-
         feature[0][i].setAttribute("class",collection.features[i].properties.DestMun.replace(/\s+/g, '-').replace(',',''));
-
-  
-   
         feature[0][i].setAttribute("stroke-width",getLineWeight(collection.features[i].properties.Count));
         feature[0][i].setAttribute("destination",collection.features[i].properties.DestMun);
 
         feature[0][i].setAttribute("origin",collection.features[i].properties.OrgMun.replace(/\s+/g, '-').replace(',',''));
-
-        //console.log(feature[0][i].getAttribute("origin"));
-
-
         feature[0][i].setAttribute("hide", "1");
-
     }
-
-
-
 
 
 
   map.on("viewreset", reset);
   reset();
 
-
+  
   // Reposition the SVG to cover the features.
   function reset() {
+    $('svg').css("display","none");
       console.log("reset");
     var bounds = path.bounds(collection),
         topLeft = bounds[0],
@@ -222,15 +215,13 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
 
     feature.attr("d", path);
 
+    setTimeout(function(){$('svg').css("display","block");},50);
   }
 
   // Use Leaflet to implement a D3 geometric transformation.
   function projectPoint(x, y) {
     var point = map.latLngToLayerPoint(new L.LatLng(y, x));
     this.stream.point(point.x, point.y);
-    
-
-
   }
 });
 
@@ -248,17 +239,6 @@ function getLineWeight(c) {
            c > 1000   ? 0.4 :
                         0.2;
 };
-
-
-
-
-
-
-
-
-
-  
-
 
 
 
@@ -296,7 +276,21 @@ var cities = [
 
 
 var citiesNoAccent=[
-"BOGOTA-DC","SANTIAGO-DE-CALI", "MEDELLIN", "SANTA-MARIA", "VALLEDUPAR","BUENAVENTURA","POPAYAN","SINCELEJO", "TUMACO","FLORENCIA","APARTADO","TURBO", "SAN-FRANCISCO-DE-QUIBDO", "CIENAGA-DE-ORO", "EL-CARMEN-DE-BOLIVAR", "SEGOVIA","TIBU","MITU", "RIOSUCIO", "SAN-PABLO","EL-CHARCO", "SAMANA", "ITUANGO", "INIRIDA","MUTATA", "SAN-LUIS","ARGELIA", "GRANADA", "RICAURTE-(COLOSO)"];
+"BOGOTA-DC","SANTIAGO-DE-CALI", 
+"MEDELLIN", "SANTA-MARIA", 
+"VALLEDUPAR","BUENAVENTURA",
+"POPAYAN","SINCELEJO", 
+"TUMACO","FLORENCIA",
+"APARTADO","TURBO", 
+"SAN-FRANCISCO-DE-QUIBDO", 
+"CIENAGA-DE-ORO", "EL-CARMEN-DE-BOLIVAR", 
+"SEGOVIA","TIBU",
+"MITU", "RIOSUCIO", 
+"SAN-PABLO","EL-CHARCO", 
+"SAMANA", "ITUANGO", 
+"INIRIDA","MUTATA", 
+"SAN-LUIS","ARGELIA", 
+"GRANADA", "RICAURTE-(COLOSO)"];
 
 
 
@@ -319,7 +313,7 @@ var mediumIcon = L.icon({
 var largeIcon = L.icon({
     iconUrl: 'icon.png',
     iconSize: [40, 47.5],
-    iconAnchor: [20, 47.5/2],
+    iconAnchor: [20, 23.75],
     popupAnchor: [-0.75, -16.5]
 });
 
@@ -335,23 +329,17 @@ function chooseIcon(population){
 
 
 
+
 for (j=0; j<29; j++)
 {
-    
-
     var marker = L.marker(cities[j][1],
-
         {
-
-
-
         icon: chooseIcon(cities[j][2]),
         opacity: 1} 
  
         )
-       
-        .addTo(map);
 
+        .addTo(map);
     var icon = document.getElementsByClassName("leaflet-marker-icon")[j];
     icon.className+=" "+cities[j][0].replace(/\s+/g, '-');
     icon.setAttribute("onclick", 'markerClick(this.classList.item(3))');
@@ -418,7 +406,7 @@ function markerClick(city){
     var city_space = city.replace(/-/g,' ');
     console.log(city);
 
-
+    var index = 0;
     for (i = 0;i<cities.length; i++)
     {
         if (city.replace(/-/g,' ') ==cities[i][0]){
@@ -429,6 +417,7 @@ function markerClick(city){
             info.innerHTML="<img src=img/"+citiesNoAccent[i]+".jpg>";
             info.style.display='block';
             $('#image').fadeTo(400,1);
+            index=i;
             break;
         }else if (i==cities.length-1){
             $('#image').fadeTo(400,0);
@@ -444,26 +433,28 @@ function markerClick(city){
 
 
     mapDiv.style.visibility="visible";
+console.log(cities[index][2]);
     //mapDiv.style.opacity=1;
-    $("#desplazados").animate({'width':''+csv[lookup[city_space]][11]/5000+"px"});
+
+    $("#population").animate({'width':'100%'});
+    document.getElementById("ptext").innerHTML=""+ cities[index][2] +" Population";
+
+    $("#desplazados").animate({'width':''+100*csv[lookup[city_space]][11]/cities[index][2]+"%"});
     document.getElementById("dtext").innerHTML=""+ csv[lookup[city_space]][11] +" Desplazados";
 
 
-    $("#refugiados").animate({'width':''+csv[lookup[city_space]][12]/5000+"px"});
+    $("#refugiados").animate({'width':''+100*csv[lookup[city_space]][12]/cities[index][2]+"%"});
     document.getElementById("rtext").innerHTML=""+ csv[lookup[city_space]][12] +" Refugiados";
 
 
-    $("#ipc").animate({'width':''+csv[lookup[city_space]][13]/5000+"px"});
-    document.getElementById("itext").innerHTML=""+ csv[lookup[city_space]][11] +" ICP's";
+    $("#ipc").animate({'width':''+100*csv[lookup[city_space]][13]/cities[index][2]+"%"});
+    document.getElementById("itext").innerHTML=""+ csv[lookup[city_space]][13] +" ICP's";
     $(mapDiv).fadeTo(1000,1)
     // $('.console').css('opacity','1');
 
     //mapDiv.appendChild(info);
     //console.log(mapDiv);
     
-
-    
-
 }
 
 
