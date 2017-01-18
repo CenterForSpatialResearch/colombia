@@ -20,6 +20,7 @@
             border: 0px;
             padding: 0px;
             font-family: Arial;
+            background-color:black;
         }
   
 
@@ -118,7 +119,7 @@
         .bar{
             margin-top:10px;
             height: 2px;
-            background:linear-gradient(to right, white, #fa612f);
+            background:linear-gradient(to right, white, #ff7111);
         }
  
 
@@ -135,6 +136,8 @@
         <div id="title"></div>
 
         <div id ="infoBars">
+            <div id="population" class="bar"></div>
+            <p id="ptext"></p>
             <div id="desplazados" class="bar"></div>
             <p id = "dtext"></p>
             <div id ="refugiados" class="bar"></div>
@@ -177,25 +180,25 @@
         <defs>
             
             <linearGradient id='NE' spreadMethod="pad" x1="0" y1="100%" x2="100%" y2="0%">
-                 <stop offset='0%' stop-color='#fa612f' stop-opacity='1' />
+                 <stop offset='0%' stop-color='#ff7111' stop-opacity='1' />
                  <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
             </linearGradient>
 
 
             <linearGradient id='NW' spreadMethod="pad" x1="100%" y1="100%" x2="0%" y2="0%">
-                 <stop offset='0%' stop-color='#fa612f' stop-opacity='1' />
+                 <stop offset='0%' stop-color='#ff7111' stop-opacity='1' />
                  <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
             </linearGradient>
 
 
             <linearGradient id='SE' spreadMethod="pad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset='0%' stop-color='#fa612f' stop-opacity='1' />
+                <stop offset='0%' stop-color='#ff7111' stop-opacity='1' />
                 <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
             </linearGradient>
 
 
             <linearGradient id='SW' spreadMethod="pad" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset='0%' stop-color='#fa612f' stop-opacity='1' />
+                <stop offset='0%' stop-color='#ff7111' stop-opacity='1' />
                 <stop offset='100%' stop-color='#FFFFFF' stop-opacity = '1'/>
             </linearGradient>
             
@@ -240,8 +243,6 @@
     <!-- Mapzen map UI -->
     <script src='//mapzen.com/common/ui/mapzen-ui.min.js'></script>
     <!--<script src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet-tilelayer-geojson/1.0.4/TileLayer.GeoJSON.js"></script>-->
-
-
 
 
 

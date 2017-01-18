@@ -17,9 +17,6 @@ map = (function () {
     var map_start_location = [4.624335, -74.063644, 6]; // Bogota
 
     /*** URL parsing ***/
-
-    // leaflet-style URL hash pattern:
-    // #[zoom],[lat],[lng]
     var url_hash = window.location.hash.slice(1, window.location.hash.length).split('/');
 
     if (url_hash.length == 3) {
@@ -38,25 +35,27 @@ map = (function () {
     }
     /*** Map ***/
 
+    //leaflet map variable
     var map = L.map('map', {
         "keyboardZoomOffset" : 1.,
-        "minZoom" : 0,
+        "minZoom" : 6,
         "maxZoom" : 15,
         "zoomControl" : true,
         }
     );
-    //map._initPathRoot();
-
+ 
+    //load YAML file for map terrain
     var layer = Tangram.leafletLayer({
         scene: scene_url,
         attribution: '<a href="https://mapzen.com/tangram" target="_blank">Tangram</a> | &copy; OSM contributors | <a href="https://mapzen.com/" target="_blank">Mapzen</a>'
     });
 
+    //leaflet map Pane for labels
     map.createPane('labels');
-    //map.createPane('overlayPane');
 
 
-//LABELS
+
+    //LABELS from YAML file
     var positronLabels = Tangram.leafletLayer({
         scene: '/scene_files/labels.yaml',
         attribution: '<a href="https://mapzen.com/tangram" target="_blank">Tangram</a> | &copy; OSM contributors | <a href="https://mapzen.com/" target="_blank">Mapzen</a>',
@@ -95,58 +94,53 @@ map = (function () {
 
     var hash = new L.Hash(map);
 
+
     layer.addTo(map);
-
-
     return map;
 
 }());
 
+
+//Limit users panning ability of the map
+map.setMaxBounds([[14, -65], [-2,-85]]);
 //END OF MAPZEN CODE
 
 
 
 var lookup={}
-//console.log(lookup);
 
-for (i = 0; i<csv.length; i++)
-{
-    lookup[csv[i][3]]=csv[i][0];
-}
+
+        for (i = 0; i<csv.length; i++)
+        {
+            lookup[csv[i][3]]=csv[i][0];
+        }
 
 //USE D3 TO LOAD VECTORS AS SVG ELEMENTS
-
-
-
-
 var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+//g element groups svg's together (html syntax)
     g = svg.append("g").attr("class", "leaflet-zoom-hide");
    
-
-d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
+//d3 function to read the geojson to an array
+d3.json("DisplacementLargeEdited_200+.geojson", function(error, collection) {
   if (error) throw error;
 
+  //call function below to map geo points to screen coordinates
   var transform = d3.geo.transform({point: projectPoint}),
       path = d3.geo.path().projection(transform);
 
-    
 
   var feature = g.selectAll("path")
         .attr("class","vector")
       .data(collection.features)
     .enter().append("path");
-        
-
-
-
-  
-
+    
+    //for loop calculates stroke for every line on the map
+    //gradient must be chosen based on direction of line
+    //happens ONCE
+    //later positions of the lines are recalculated but appearance is constant
     for (i=0; i<collection.features.length;i++)
-
-
     {
-
-        var direction
+        var direction;
         //POS = south
         var directionLon = collection.features[i].properties.OrgLon-collection.features[i].properties.DestLon;
 
@@ -159,7 +153,6 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
                 direction = "NE";
                 feature[0][i].setAttribute("direction", "NE");
                 feature[0][i].setAttribute("stroke","url(#NE)");
-
             }
             else{
                 direction = "SE";
@@ -180,34 +173,23 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
             }
         }
 
-
         feature[0][i].setAttribute("class",collection.features[i].properties.DestMun.replace(/\s+/g, '-').replace(',',''));
-
-  
-   
         feature[0][i].setAttribute("stroke-width",getLineWeight(collection.features[i].properties.Count));
         feature[0][i].setAttribute("destination",collection.features[i].properties.DestMun);
 
         feature[0][i].setAttribute("origin",collection.features[i].properties.OrgMun.replace(/\s+/g, '-').replace(',',''));
-
-        //console.log(feature[0][i].getAttribute("origin"));
-
-
         feature[0][i].setAttribute("hide", "1");
-
     }
-
-
-
 
 
 
   map.on("viewreset", reset);
   reset();
 
-
+  
   // Reposition the SVG to cover the features.
   function reset() {
+    $('svg').css("display","none");
       console.log("reset");
     var bounds = path.bounds(collection),
         topLeft = bounds[0],
@@ -222,22 +204,20 @@ d3.json("DisplacementLargeEdited_100+.geojson", function(error, collection) {
 
     feature.attr("d", path);
 
+    setTimeout(function(){$('svg').css("display","block");},50);
   }
 
   // Use Leaflet to implement a D3 geometric transformation.
   function projectPoint(x, y) {
     var point = map.latLngToLayerPoint(new L.LatLng(y, x));
     this.stream.point(point.x, point.y);
-    
-
-
   }
 });
 
 
   
 
-
+//returns a line weight scaled to number of ppl displaced
 function getLineWeight(c) {
     return c > 40000  ? 6 :
            c > 30000  ? 5 :
@@ -250,18 +230,8 @@ function getLineWeight(c) {
 };
 
 
-
-
-
-
-
-
-
-  
-
-
-
-
+//hard coded data
+//[CITY,[LAT,LON],POPULATION]
 var cities = [
 ["BOGOTÁ D.C.", [4.65052840264, -74.105971599], 6376000,],
 ["SANTIAGO DE CALI", [3.417586541, -76.5223324663],2040000],
@@ -295,11 +265,26 @@ var cities = [
 ];
 
 
+//city names, used to query correct image file
 var citiesNoAccent=[
-"BOGOTA-DC","SANTIAGO-DE-CALI", "MEDELLIN", "SANTA-MARIA", "VALLEDUPAR","BUENAVENTURA","POPAYAN","SINCELEJO", "TUMACO","FLORENCIA","APARTADO","TURBO", "SAN-FRANCISCO-DE-QUIBDO", "CIENAGA-DE-ORO", "EL-CARMEN-DE-BOLIVAR", "SEGOVIA","TIBU","MITU", "RIOSUCIO", "SAN-PABLO","EL-CHARCO", "SAMANA", "ITUANGO", "INIRIDA","MUTATA", "SAN-LUIS","ARGELIA", "GRANADA", "RICAURTE-(COLOSO)"];
+"BOGOTA-DC","SANTIAGO-DE-CALI", 
+"MEDELLIN", "SANTA-MARIA", 
+"VALLEDUPAR","BUENAVENTURA",
+"POPAYAN","SINCELEJO", 
+"TUMACO","FLORENCIA",
+"APARTADO","TURBO", 
+"SAN-FRANCISCO-DE-QUIBDO", 
+"CIENAGA-DE-ORO", "EL-CARMEN-DE-BOLIVAR", 
+"SEGOVIA","TIBU",
+"MITU", "RIOSUCIO", 
+"SAN-PABLO","EL-CHARCO", 
+"SAMANA", "ITUANGO", 
+"INIRIDA","MUTATA", 
+"SAN-LUIS","ARGELIA", 
+"GRANADA", "RICAURTE-(COLOSO)"];
 
 
-
+//proportionally sized icons
 var smallIcon = L.icon({
     iconUrl: 'icon.png',
     iconSize: [20, 23.75],
@@ -319,9 +304,10 @@ var mediumIcon = L.icon({
 var largeIcon = L.icon({
     iconUrl: 'icon.png',
     iconSize: [40, 47.5],
-    iconAnchor: [20, 47.5/2],
+    iconAnchor: [20, 23.75],
     popupAnchor: [-0.75, -16.5]
 });
+
 
 function chooseIcon(population){
    if (population<100000){
@@ -335,31 +321,24 @@ function chooseIcon(population){
 
 
 
+//add icons for 28 cities
 for (j=0; j<29; j++)
 {
-    
-
     var marker = L.marker(cities[j][1],
-
         {
-
-
-
         icon: chooseIcon(cities[j][2]),
         opacity: 1} 
  
         )
-       
         .addTo(map);
-
     var icon = document.getElementsByClassName("leaflet-marker-icon")[j];
     icon.className+=" "+cities[j][0].replace(/\s+/g, '-');
-    icon.setAttribute("onclick", 'markerClick(this.classList.item(3))');
-
-    
+    icon.setAttribute("onclick", 'markerClick(this.classList.item(3))'); 
 };
 
 
+//on marker click, open data tray
+//save the ID of the last clicked city
 var lastClicked=0;
 function markerClick(city){
     
@@ -371,16 +350,9 @@ function markerClick(city){
            test.setAttribute("hide","1");
 
        });
-
-
-
-    
     var icon  = Array.prototype.slice.call(document.getElementsByClassName(city));
     console.log(icon);
-
-    
     lastClicked=city;
-
     [].forEach.call(icon, function(test){  
 
         test.setAttribute("hide","0");
@@ -388,14 +360,7 @@ function markerClick(city){
 
     });
 
-
-
-
-
-
-
-
-
+//remove irrelevant paths
     var paths = document.getElementsByTagName('path');
     [].forEach.call(paths, function(test){
         if(test.getAttribute("hide")>0){
@@ -407,18 +372,13 @@ function markerClick(city){
     
     
     
-
+//modify inner html
     var info = document.getElementById("image");
-
-
-    // while (info.hasChildNodes()) {
-    //     info.removeChild(info.firstChild);
-    // }
-
+ 
     var city_space = city.replace(/-/g,' ');
     console.log(city);
 
-
+    var index = 0;
     for (i = 0;i<cities.length; i++)
     {
         if (city.replace(/-/g,' ') ==cities[i][0]){
@@ -429,6 +389,7 @@ function markerClick(city){
             info.innerHTML="<img src=img/"+citiesNoAccent[i]+".jpg>";
             info.style.display='block';
             $('#image').fadeTo(400,1);
+            index=i;
             break;
         }else if (i==cities.length-1){
             $('#image').fadeTo(400,0);
@@ -439,30 +400,25 @@ function markerClick(city){
 
 
 
-    //info.innerHTML=getElement(city_space,1);
-
-
-
     mapDiv.style.visibility="visible";
+    console.log(cities[index][2]);
     //mapDiv.style.opacity=1;
-    $("#desplazados").animate({'width':''+csv[lookup[city_space]][11]/5000+"px"});
+
+    $("#population").animate({'width':'100%'});
+    document.getElementById("ptext").innerHTML=""+ cities[index][2] +" Population";
+
+    $("#desplazados").animate({'width':''+100*csv[lookup[city_space]][11]/cities[index][2]+"%"});
     document.getElementById("dtext").innerHTML=""+ csv[lookup[city_space]][11] +" Desplazados";
 
 
-    $("#refugiados").animate({'width':''+csv[lookup[city_space]][12]/5000+"px"});
+    $("#refugiados").animate({'width':''+100*csv[lookup[city_space]][12]/cities[index][2]+"%"});
     document.getElementById("rtext").innerHTML=""+ csv[lookup[city_space]][12] +" Refugiados";
 
 
-    $("#ipc").animate({'width':''+csv[lookup[city_space]][13]/5000+"px"});
-    document.getElementById("itext").innerHTML=""+ csv[lookup[city_space]][11] +" ICP's";
+    $("#ipc").animate({'width':''+100*csv[lookup[city_space]][13]/cities[index][2]+"%"});
+    document.getElementById("itext").innerHTML=""+ csv[lookup[city_space]][13] +" ICP's";
+    
     $(mapDiv).fadeTo(1000,1)
-    // $('.console').css('opacity','1');
-
-    //mapDiv.appendChild(info);
-    //console.log(mapDiv);
-    
-
-    
 
 }
 
@@ -472,6 +428,7 @@ function getCity(index){
 };
 
 
+//reset lines when the map terrain is clicked
 $(document).click(function(event){
 
 

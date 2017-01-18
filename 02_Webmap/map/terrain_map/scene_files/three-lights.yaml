@@ -17,13 +17,14 @@ lights:
     directional2:
         type: directional
         direction: [-1, -.4, -.5]
+        specular: [1,1,1]
         diffuse: '#535353'
     point1:
         type: point
         position: [1,1,2.4]
         ambient: [0.07,0.07,0.07]
         diffuse: [0.01,0.01,0.01]
-        specular: [1,1,1]
+        specular: .5
 
 
 
@@ -62,7 +63,7 @@ layers:
         draw:
             lines: 
                 order: 1
-                color: [.3, .3, .3]
+                color: [255, 255, 255]
                 width: 1px
     water:
         data: {source: osm}
@@ -73,5 +74,6 @@ layers:
             lines:
                 order: 2
                 color: '#ffffff'
+
 
     
