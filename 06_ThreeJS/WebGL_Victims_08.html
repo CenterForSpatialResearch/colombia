@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+		<title>three.js webgl - particles</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<script src="/06_ThreeJS/build/three.js"></script>
+		<script src="/06_ThreeJS/js/Detector.js"></script>
+		<script src="/06_ThreeJS/js/libs/stats.min.js"></script>
+		<script src="/06_ThreeJS/js/libs/tween.min.js"></script>
+		<script type="text/javascript" src="d3/d3.js"></script>
+		<script src="https://d3js.org/d3-queue.v3.min.js"></script>
+		<style>
+			/* 
+			*********** Document CSS styling
+			*/
+			
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				/*font-weight: bold;*/
+				text-align:center;
+			}
+
+			a {
+				color:#0078ff;
+			}
+
+			/*
+			*********** CSS Styling of Buttons to sort and color data
+			*/
+
+			/* Buttons that sort the data */
+
+			#sortKey{
+				color: #fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#sortHecho{
+				color: #fff;
+				position: absolute;
+				top: 30px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#sortActor{
+				color: #fff;
+				position: absolute;
+				top: 60px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#sortGender{
+				color: #fff;
+				position: absolute;
+				top: 90px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#sortRace{
+				color: #fff;
+				position: absolute;
+				top: 120px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#sortEventDate{
+				color: #fff;
+				position: absolute;
+				top: 150px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#sortReportDate{
+				color: #fff;
+				position: absolute;
+				top: 180px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			/*Buttons to color the data */
+
+			#colorKey{
+				color: #fff;
+				position: absolute;
+				top: 220px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorHecho{
+				color: #fff;
+				position: absolute;
+				top: 250px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorActor{
+				color: #fff;
+				position: absolute;
+				top: 280px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorGender{
+				color: #fff;
+				position: absolute;
+				top: 310px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorRace{
+				color: #fff;
+				position: absolute;
+				top: 340px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorEventDate{
+				color: #fff;
+				position: absolute;
+				top: 370px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			#colorReportDate{
+				color: #fff;
+				position: absolute;
+				top: 400px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+			/* Styling of our tooltip that pops out and displays relevant info on selected pixel */
+
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			/*Hide the tooltip when we are not scrolling over data*/
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			/*Tooltip paragraph styling*/
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 16px;
+				line-height: 20px;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<!-- Divs to sort and color data. D3 listens to these divs and updates GL once they are clicked -->
+
+		<!-- Divs to sort data -->
+
+		<div id="sortKey">
+			Sort by key
+		</div>
+
+		<div id="sortHecho">
+			Sort by param hecho
+		</div>
+
+		<div id="sortActor">
+			Sort by actor
+		</div>
+
+		<div id="sortGender">
+			Sort by gender
+		</div>
+
+		<div id="sortRace">
+			Sort by race
+		</div>
+
+		<div id="sortEventDate">
+			Sort by event date
+		</div>
+
+		<div id="sortReportDate">
+			Sort by report date
+		</div>
+
+		<!-- Divs to color -->
+
+		<div id="colorKey">
+			Color by Key
+		</div>
+
+		<div id="colorHecho">
+			Color by Hecho
+		</div>
+
+		<div id="colorActor">
+			Color by Actor
+		</div>
+
+		<div id="colorGender">
+			Color by Gender
+		</div>
+
+		<div id="colorRace">
+			Color by Race
+		</div>
+
+		<!--  No longer want to color by date		<div id="colorEventDate">
+			Color by Date
+		</div> -->
+
+		<!-- Start the tooltip out as class hidden until we scroll over -->
+		<div id="tooltip" class="hidden">
+			<p><strong>My Value</strong></p>
+			<p><span id="value">100</span></p>
+		</div>
+
+		
+		<script>
+
+			// #############################################################################
+			// #############################################################################
+			// ########################## JAVASCRIPT + THREE.JS ############################
+			// #############################################################################
+			// #############################################################################
+
+			// Webgl error message
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			// #############################################################################
+			// ############################# GLOBAL VARIABLES ##############################
+			// #############################################################################
+
+			var container, stats;
+			var fieldGeom, camera, scene, renderer, raycaster, particles, geometry, materials = [], colors = [], parameters, i, h, color, size;
+			var clock = new THREE.Clock();
+
+			var viewSize, aspectRatio, myWidth, myHeight;
+
+			var needUpdate = false;
+
+			var duration = currentTime = 3;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			// For best viewing on my display, 1:3 ratio
+			var rectSize = 1; //1
+			var rectSpacerW = rectSpacerH = 3; //3
+
+			var mouse = new THREE.Vector2();
+			var threshold = rectSpacerW*2;
+			var sphere;
+			var raycastOn;
+
+			// var myFileDataPath = "/06_ThreeJS/data/20k_test_W_sorts.csv";
+			// var myFileDataPath = "/06_ThreeJS/data/SmallTest200k.csv";
+			var myFileDataPath = "/06_ThreeJS/data/200k_opened_correct_wcs_nocomma_OUTPUT.csv";
+			// var myFileDataPath = "/06_ThreeJS/data/50k_opened_correct_wcs_nocomma_OUTPUT.csv";
+
+			//Victims dataset
+			var datasetVictims = [];
+
+			//Run our script, this function and d3 prevent viz from running before data is fully loaded
+			parseMyFile(myFileDataPath);
+
+
+			// #############################################################################
+			// ###### Parses data and establishes queue to load data before viz is run #####
+			// #############################################################################
+
+
+			function parseMyFile(myFileName) {
+				var q = d3.queue();
+				q.defer(function(callback) {
+					d3.csv(myFileName, function(res) {
+
+						//By default, csv loads all data as strings, here we parse the data into
+						//other data types
+						res.forEach(function(d,i) {
+							d.key = i;							//we also add a temporary key value
+							d.cod_persona = +d.cod_persona;
+
+							d.param_hecho = +d.param_hecho;
+
+							d.uniqueRank_param_hecho = +d.uniqueRank_param_hecho;
+							d.uniqueRank_pert_etnica = +d.uniqueRank_pert_etnica;
+							d.uniqueRank_genero_hom = +d.uniqueRank_genero_hom;
+							d.uniqueRank_event_date = +d.uniqueRank_event_date;
+							d.uniqueRank_actors = +d.uniqueRank_actors;
+							d.uniqueRank_report_date = +d.uniqueRank_report_date;
+
+
+							//Reclassifying race data col
+							if (d.pert_etnica == "Negro(a) o Afrocolombiano(a)") {
+								d.pert_etnica = "Afrocolombian";
+							}
+							else if (d.pert_etnica == "Gitano(a) ROM") {
+								d.pert_etnica = "ROM";
+							}
+							else if (d.pert_etnica == "Indigena") {
+								d.pert_etnica = "Indigenous";
+							}
+							else if (d.pert_etnica == "Palenquero") {
+								d.pert_etnica = "Palenquero"
+							}
+							else if (d.pert_etnica == "Raizal del Archipielago de San Andres y Providencia") {
+								d.pert_etnica = "San Andres Providencia";
+							}
+							else {
+								d.pert_etnica = "None";
+							}
+
+							d.thisColor = [0,0,0];
+
+						});
+
+						//Passes data to the queue once we have loaded datat
+						callback(null, res);
+					});
+				});
+
+				//Once data has loaded, execute rest of code
+				q.await(restOfCode);
+			};
+
+			// #############################################################################
+			// ################# AFTER DATA HAS LOADED, RUN THE REST #######################
+			// #############################################################################
+
+			function restOfCode(err, results) {
+
+				// Set dataset to the data d3 just loaded in the queue
+				datasetVictims = results;
+				var dataSetLen = datasetVictims.length;
+				// var dataSetLen = 100000;
+
+				// Three JS functions to first initialize and then animate the scene
+				init();
+				animate();
+
+				// #############################################################
+				// ################# D3 div Click Events #######################
+				// #############################################################
+
+				// ### Sorting events ###
+
+				//D3 to Handle click events on sorting our divs
+				//d3 listens for when our divs are clicked and then prompts the animation to reset
+
+				d3.select("#sortKey").on("click", function() {
+					// console.log("You clicked the key!");
+
+					// Tell Three JS that we need to update the animation
+					resetAnimation();
+
+					// Update the 3vectors for all of the particles loaded
+					// Each particle has an associated vector, the intial position being the current position of the particle and
+					// the final positoin being the indexed XY coordinate of the particle depending on which sort the user has picked
+					// Using a timer that is reset each time one of thee sorts is clicked, the animation moves the particle in a straight line
+					// from the initial to the final position by multiplying the vector between the two points by 1/(time left in transition
+					// animation). Here, for each particle we simply update the start position to the particles current position, the end
+					// position to be the user specified sort XY coordinate, and the direction to be the vector b/w those two points.
+					// The particles are moved along these vectors in the animate portion of the code.
+
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						// Make sure the start position is the current 3vector
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);	
+						// Find the new desired XY coordinates	
+						var newXY = getXYCoordinates(thisDataPt.key, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						// Compute the vector between these two points
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+					}
+
+				});
+
+				
+				d3.select("#sortHecho").on("click", function() {
+					// console.log("You clicked the hecho!");
+
+					resetAnimation();
+
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_param_hecho, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+				});
+
+				d3.select("#sortActor").on("click", function() {
+					// console.log("You clicked actor!");
+
+					resetAnimation();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_actors, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+
+				});
+
+				d3.select("#sortGender").on("click", function() {
+					// console.log("You clicked the gender!");
+					
+					resetAnimation();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_genero_hom, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+				});
+
+				d3.select("#sortRace").on("click", function() {
+					// console.log("You clicked the race!");
+
+					resetAnimation();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_pert_etnica, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+				});
+
+				d3.select("#sortEventDate").on("click", function() {
+					// console.log("You clicked the event date!");
+					
+					resetAnimation();
+
+					// Optional color by a random color method
+					// var randomColorSelect = Math.random();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_event_date, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+						// Optional color by a random number
+						// if (randomColorSelect < 0.2) {
+						// 	geometry.colors[i] = colorKey(thisDataPt);
+						// } else if (randomColorSelect < 0.4) {
+						// 	geometry.colors[i] = colorHecho(thisDataPt);
+						// } else if (randomColorSelect < 0.6) {
+						// 	geometry.colors[i] = colorActor(thisDataPt);
+						// } else if (randomColorSelect < 0.8) {
+						// 	geometry.colors[i] = colorGender(thisDataPt);
+						// } else {
+						// 	geometry.colors[i] = colorRace(thisDataPt);
+						// }
+					}
+
+				d3.select("#sortReportDate").on("click", function() {
+					// console.log("You clicked the report date!");
+
+					resetAnimation();
+
+					//Update the 3vectors for all of hte particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_report_date, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+					}
+
+				})
+
+				});
+
+				// ### Color Events ###
+
+				d3.select("#colorKey").on("click", function() {
+					// console.log("You want to color by key!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorKey(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorHecho").on("click", function() {
+					// console.log("You want to color by hecho!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorHecho(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorActor").on("click", function() {
+					// console.log("You want to color by actor!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorActor(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorGender").on("click", function() {
+					// console.log("You want to color by gender!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorGender(thisDataPt);
+					}
+
+				});
+
+				d3.select("#colorRace").on("click", function() {
+					// console.log("You want to color by race!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorRace(thisDataPt);
+					}
+
+				});
+
+				// //No date color :/ could make it a color gradient?
+				// d3.select("#colorEventDate").on("click", function() {
+				// 	console.log("You want to color by date!");
+
+				// 	// Update colors of the particles
+				// 	for (i = 0; i < dataSetLen; i ++){
+
+				// 		var thisDataPt = datasetVictims[i];
+				// 		geometry.colors[i] = colorEventDate(thisDataPt);
+				// 	}
+
+				// 	// Color by date gradient
+
+				// });
+
+
+			}
+
+			// #############################################################################
+			// ##################### THREE JS INITIALIZATION ###############################
+			// #############################################################################
+
+			function init() {
+
+				// Tell Three JS where it will be on the webpage
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				// Setup view settings
+				viewSize = 900;
+				aspectRatio = window.innerWidth / window.innerHeight;
+
+				myHeight = viewSize;
+				myWidth = parseInt(viewSize*aspectRatio);
+
+				myPadding = 50;
+				camViewSize = viewSize + myPadding;
+				camHshift = 10; //10
+
+				// Create a Three JS camera and position it to look at our viz
+				// camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
+				// camera = new THREE.OrthographicCamera(-aspectRatio * viewSize / 2, aspectRatio * viewSize / 2, viewSize/2, viewSize/ -2, -100, 100);
+				camera = new THREE.OrthographicCamera(-aspectRatio * camViewSize / 2, aspectRatio * camViewSize / 2, camViewSize/2+camHshift, camViewSize/ -2+camHshift, -100, 100);
+				camera.position.x = myWidth/2;
+				camera.position.y = myHeight/2;
+				camera.position.z = 1;
+
+
+				// Initialize the scene that will hold our geometry
+				scene = new THREE.Scene();
+
+				// We must bind the data to geometry - the geometry itself cannot be visualized without being assigned a material
+				// (later in code), but it holds valuable data like the position of each data point
+				geometry = new THREE.Geometry();
+
+				// For each data point, create a vertex and a color
+				// For the intial data load we abritrarily set the data to sort to report date XY positions and
+				// we assign the color to be based off of the color key
+				for ( i = 0; i < datasetVictims.length; i ++ ) {
+					thisDataPt = datasetVictims[i];
+
+					var xyCoord = getXYCoordinates(thisDataPt.key, myWidth, myHeight);
+					var vertex = new THREE.Vector3();
+					vertex.startPosition = new THREE.Vector3(xyCoord[0], xyCoord[1], 0);
+					xyCoord = getXYCoordinates(thisDataPt.uniqueRank_report_date, myWidth, myHeight);
+					vertex.endPosition = new THREE.Vector3(xyCoord[0], xyCoord[1], 0);
+					vertex.direction = vertex.startPosition.clone().sub(vertex.endPosition);
+					vertex.copy(vertex.startPosition);
+
+					geometry.vertices.push( vertex );
+
+					colors[i] = colorKey(thisDataPt);
+				}
+
+				// Assign our desired color to each piece of geometry
+				geometry.colors = colors;
+
+				// For each datapoint we asign a point material with a rectangle (pixel) size and our desired color
+				material = new THREE.PointsMaterial({size: rectSize, sizeAttenuation: false, vertexColors: THREE.VertexColors});
+
+				// We now bind the geometry to the material to create a point that can be visualized, and then add those points to the scene
+				particles = new THREE.Points(geometry, material);
+				scene.add(particles);
+
+				// Create a mesh sphere that we place over the datapoint that the users mouse is hovering on
+				var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+				var sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, shading: THREE.FlatShading } );
+				sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);	// bind the geometry to the material and create a mesh
+				scene.add(sphere);		// add this mesh to the scene
+
+				// In order to handle mouseover events we create a raycaster and a threshold
+				// from the camera's POV, whenever the mouse comes within our threshold of a given location
+				// we will want to get this mouse over position and the associated point's data to display to the suer
+				raycaster = new THREE.Raycaster();
+				raycaster.params.Points.threshold = threshold;
+
+				// To actually render the scene we execute the following
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				// Displays our framerate in the ULH corner
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				// Event listeners that listen for when the mouse is moved or when the window is resized
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				// document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				// document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+				// document.addEventListener( 'mousedown', onDocumentMouseDown, false);
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			// #############################################################################
+			// ######################## THREE JS DOCUMENT EVENTS ###########################
+			// #############################################################################
+
+			function onWindowResize() {
+				//Variables to update whenever the browser window is resized
+
+				// console.log("Window resized");
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				aspectRatio = window.innerWidth / window.innerHeight;
+
+				camera.left   = - camViewSize * aspectRatio / 2;
+				camera.right  =   camViewSize * aspectRatio / 2;
+				camera.top    =   camViewSize / 2 + camHshift;
+				camera.bottom = - camViewSize / 2 + camHshift;
+
+				camera.updateProjectionMatrix();
+
+				// myHeight = viewSize;
+				// myWidth = viewSize*aspectRatio;
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onDocumentMouseMove( event ) {
+				//Update our mouse x and y position whenever the mouse moves
+
+				event.preventDefault();
+
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+				// console.log(mouse);
+
+			}
+
+
+			// #############################################################################
+			// ############################ COLOR FUNCTIONS ###############################
+			// #############################################################################
+
+			// Rules to color each parameter given a datapoint
+
+			function colorKey (_thisDataPt) {
+				var gradientLength = 255;
+
+				return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
+			}
+
+			function colorHecho (_thisDataPt) {
+				// //RGB COLORS
+				// var _color1 = new THREE.Color("rgb(24, 100, 90)");
+				// var _color2 = new THREE.Color("rgb(169, 100, 90)");
+				// var _color3 = new THREE.Color("rgb(211, 200, 82)");
+				// var _color4 = new THREE.Color("rgb(0, 0, 35)");
+
+				//HEX COLORS Processing consistent
+				var _color1 = new THREE.Color("#e65c00");
+				var _color2 = new THREE.Color("#00e6bc");
+				var _color3 = new THREE.Color("#3781d1");
+				var _color4 = new THREE.Color("#595959");
+
+
+				if(_thisDataPt.param_hecho == 5) {
+					return _color1;
+				}
+				else if(_thisDataPt.param_hecho == 6) {
+					return _color2;
+				}
+				else if(_thisDataPt.param_hecho == 2) {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}
+			}
+
+			function colorActor (_thisDataPt) {
+				// //RGB Colors
+				// var _color1 = new THREE.Color("rgb(250, 100, 100)");
+				// var _color2 = new THREE.Color("rgb(20, 160, 190)");
+				// var _color3 = new THREE.Color("rgb(90, 140, 250)");
+				// var _color4 = new THREE.Color("rgb(200, 160, 80)");
+
+				//Hex Colors Processing Consistent
+				var _color1 = new THREE.Color('#e128aa');
+				var _color2 = new THREE.Color('#aae128');
+				var _color3 = new THREE.Color('#28aae1');
+				var _color4 = new THREE.Color('#595959');
+
+				if (_thisDataPt.autor_guerrillas == 1) {
+					return _color1;
+				}
+				else if(_thisDataPt.autor_paramilitares == 1) {
+					return _color2;
+				}
+				else if(_thisDataPt.autor_fuerza_publica == 1) {
+					return _color3;
+				} 
+				else {
+					return _color4;
+				}
+			}
+
+			function colorGender (_thisDataPt) {
+				//Might need ot change for large or small city
+
+				// //RGB Color
+				// var _color1 = new THREE.Color("rgb(318, 82, 88)");
+				// var _color2 = new THREE.Color("rgb(78, 82, 88)");
+				// var _color3 = new THREE.Color("rgb(198, 82, 88)");
+				// var _color4 = new THREE.Color("rgb(70, 30, 35)");
+
+				//Hex Colors Processing Consistent
+				var _color1 = new THREE.Color('#e128aa');
+				var _color2 = new THREE.Color('#aae128');
+				var _color3 = new THREE.Color('#28aae1');
+				var _color4 = new THREE.Color('#595959');
+
+				if(_thisDataPt.genero_hom == "Mujer") {
+					return _color1;
+				}
+				else if(_thisDataPt.genero_hom == "Female") {
+					return _color2;
+				}
+				else if(_thisDataPt.genero_hom == "No Informa") {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}
+			}
+
+			function colorRace (_thisDataPt) {
+				// //RGB Colors
+				// var _color1 = new THREE.Color("rgb(150, 75, 70)");
+				// var _color2 = new THREE.Color("rgb(39, 75, 100)");
+				// var _color3 = new THREE.Color("rgb(279, 75, 75)");
+				// var _color4 = new THREE.Color("rgb(90, 90, 35)");
+
+				//Hex Colors Processing Consistent
+				var _color1 = new THREE.Color("#2db370");
+				var _color2 = new THREE.Color("#b3842d");
+				var _color3 = new THREE.Color("#842db3");
+				var _color4 = new THREE.Color("#595959");
+
+				if(_thisDataPt.pert_etnica == "None") {
+					return _color1;
+				}
+				else if(_thisDataPt.pert_etnica == "Afrocolombian") {
+					return _color2;
+				}
+				else if(_thisDataPt.pert_etnica == "Indigenous") {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}	
+			}
+
+			// function colorEventDate (_thisDataPt) {
+			// 	var gradientLength = datasetVictims.length;;
+
+			// 	return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
+			// }
+
+
+			// #############################################################################
+			// ##################### THREE JS ANIMATION  AND RENDER ########################
+			// #############################################################################
+
+			function resetAnimation() {
+				//Function that we call to reset the animation
+
+				// turn off the raycaster while the viz is transitioning to reduce burden on browser
+				raycastOn = false;
+				// console.log(raycastOn);
+
+				// Reset our countdown timer - this timer is what enables the particles to slide along their
+				// initial position to their final position
+				currentTime = duration;
+			}
+
+			//Time delta to track time passed
+			var delta;
+
+
+			function animate() {
+				//Function attempts to run 60 FPS to run our Viz smoothly
+
+				//
+				delta = clock.getDelta();
+				currentTime -= delta;
+
+				if(currentTime < 0) {
+					// currentTime is less than 0 so any user defined sort has finished
+
+					// reset our currenTime to 0 since it is already negative
+					 currentTime = 0;
+
+					// Since the particles are not moving we want to calculate raytracing and mouseover				 
+					 raycastOn = true;
+				}
+				// Three JS request the animation frame
+				requestAnimationFrame( animate );
+
+				// Moves the particles from their initial positin to their final position
+				// Note that once the particles arrive in the user defined sort positoins, after a sort is complete
+				// (inital position) = (final position) and the length of the vector is 0 so the particles do not move
+				geometry.vertices.forEach(function(vertex){
+					vertex.addVectors(vertex.endPosition,vertex.direction.clone().multiplyScalar(currentTime / duration));
+				});
+
+				// Tells Three JS that we should update the geometries verticies (position on screen) and their color
+				// for every frame we display
+				geometry.verticesNeedUpdate = true;
+				geometry.colorsNeedUpdate = true;
+
+				// Tell Three JS to redner the scene and update our stats
+				render();
+				stats.update();
+
+			}
+
+
+			function render() {
+
+
+				//Calculate raycaster intersections (mouseover events) when we are not actively moving particles on screen
+				if (raycastOn) {
+					// Tell three JS where we are drawing our ray from and based on what point
+					raycaster.setFromCamera( mouse, camera );
+
+					// Calculate what paricles if any the raycaster intersects
+					var intersections = raycaster.intersectObject(particles);
+					intersection = (intersections.length) > 0 ? intersections[0] : null;
+
+					if(intersection != null) {
+						// In the event that we DO intersect a particle, intersection is not null and we proceed
+
+						var intersectPosition = intersection.point;
+
+						//Move our sphere to the intersected poisition
+						sphere.position.copy(intersectPosition);
+						sphere.scale.set(5, 5, 5);
+
+						// Tell d3 where to display our tooltip
+						d3.select("#tooltip")
+						.style("left", intersectPosition.x*0.6 + "px")						//eventually should scale the x,y so it is the same size as the space where the pixels are displayed
+						.style("top", (windowHalfY*2 - intersectPosition.y +camHshift)*0.7 + "px")						
+						.select("#value")
+						.text("i: " + intersection.index + ", x pos: " + geometry.vertices[intersection.index].x + ", y pos: " + geometry.vertices[intersection.index].y );
+			   
+						//Show the tooltip
+						d3.select("#tooltip").classed("hidden", false);
+
+					} else {
+						//Hide the tooltip
+						d3.select("#tooltip").classed("hidden", true);
+					}
+				} else {
+					//Hide the tooltip
+					d3.select("#tooltip").classed("hidden", true);
+				}
+
+				// Three JS render this scene with this camera
+				renderer.render( scene, camera );
+
+			}
+
+			//Given a data index return the x and y coordinates in the array
+			function getXYCoordinates(_thisIndex, _width, _height) {
+					//Eventually will change so data is sorted from top to bottom
+
+					// //Sorting from left to right, starting at bottom Right Hand Corner
+					// maxWidth = _width - (_width%(rectSize+rectSpacerW));
+
+					// var myList = [];
+
+					// // myList[0] = parseInt((_thisIndex*(rectSize+rectSpacerW))%maxWidth)
+					// // myList[1] = parseInt( ( ( (1+_thisIndex) * (rectSize+rectSpacerH) ) / _width) ) * (rectSpacerH+rectSize)
+
+					// myList[0] = (_thisIndex*(rectSize+rectSpacerW))%maxWidth
+					// myList[1] = ( ( ( (1+_thisIndex) * (rectSize+rectSpacerH) ) / _width) ) * (rectSpacerH+rectSize)
+
+					//Sorting from top to bottom, starting at upper left hand corner
+					maxHeight = _height - (_height%(rectSize+rectSpacerH));
+
+					var myList = [];
+					myList[0] = ( ( (1+_thisIndex) * (rectSize+rectSpacerH) ) / _height ) * (rectSpacerW+rectSize)
+					myList[1] = maxHeight - (_thisIndex*(rectSize+rectSpacerH))%maxHeight
+
+
+					return myList;
+			}
+
+
+
+		</script>
+	</body>
+</html>
