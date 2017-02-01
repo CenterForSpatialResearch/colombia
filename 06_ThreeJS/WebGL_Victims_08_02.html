@@ -21,7 +21,7 @@
 				background-color: #000000;
 				margin: 0px;
 				overflow: hidden;
-				font-family:Monospace;
+				font-family: sans-serif;
 				font-size:13px;
 				text-align:center;
 				/*font-weight: bold;*/
@@ -30,7 +30,7 @@
 
 			p {
 				/*color: #fff;*/
-				font-family: Monospace;
+				/*font-family: Monospace;*/
 				font-size:8px;
 				text-align: left;
 			}
@@ -49,7 +49,7 @@
 			}
 
 			#titleText{
-				font-family: Monospace;
+				/*font-family: Monospace;*/
 				font-size:13px;
 				text-align: left;
 			}
@@ -57,7 +57,7 @@
 			#legends{
 				position: absolute;
 				/*width:100px;*/
-				right:200px;
+				right:300px;
 				padding:5px;
 			}
 
@@ -66,32 +66,37 @@
 				top:0px;
 				/*padding:5px;*/
 				left: 0px;
+				width:70px;
 			}
 
 			#legend02{
 				position: absolute;
 				top:0px;
 				/*padding:5px;*/
-				left: 50px;
+				left: 80px;
 				/*right: 5px;*/
+				width:70px;
 			}
 
 			#legend03{
 				position: absolute;
 				top:0px;
-				left: 100px;
+				left: 160px;
+				width:70px;
 			}
 
 			#legend04{
 				position: absolute;
 				top:0px;
-				left: 150px;
+				left: 240px;
+				width:70px;
 			}
 
 			#legendRect01{
 				position: absolute;
 				/*vertical-align: bottom;*/
 				/*float: left;*/
+				top: 10px;
 				left: -8px;
 				width: 5px;
 				height: 5px;
@@ -100,9 +105,8 @@
 
 			#legendRect02{
 				position: absolute;
-				/*vertical-align: bottom;*/
-				/*float: left;*/
-				left: 42px;
+				top: 10px;
+				left: 72px;
 				width: 5px;
 				height: 5px;
 				background-color: #000000;
@@ -110,9 +114,8 @@
 
 			#legendRect03{
 				position: absolute;
-				/*vertical-align: bottom;*/
-				/*float: left;*/
-				left: 92px;
+				top: 10px;
+				left: 152px;
 				width: 5px;
 				height: 5px;
 				background-color: #000000;
@@ -120,9 +123,8 @@
 
 			#legendRect04{
 				position: absolute;
-				/*vertical-align: bottom;*/
-				/*float: left;*/
-				left: 142px;
+				top: 10px;
+				left: 232px;
 				width: 5px;
 				height: 5px;
 				background-color: #000000;
@@ -254,11 +256,11 @@
 				position: absolute;
 				width: 200px;
 				height: auto;
-				padding: 10px;
+				padding: 5px;
 				background-color: #000000;
-				-webkit-border-radius: 10px;
-				-moz-border-radius: 10px;
-				border-radius: 10px;
+				/*-webkit-border-radius: 10px;*/
+				/*-moz-border-radius: 10px;*/
+				/*border-radius: 10px;*/
 				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
 				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
 				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
@@ -275,7 +277,7 @@
 				margin: 0;
 				font-family: sans-serif;
 				font-size: 12px;
-				line-height: 20px;
+				line-height: 18px;
 			}
 
 		</style>
@@ -374,8 +376,11 @@
 
 		<!-- Start the tooltip out as class hidden until we scroll over -->
 		<div id="tooltip" class="hidden">
-			<p><strong>My Value</strong></p>
-			<p><span id="value">100</span></p>
+			<p><span id="dateText">100</span></p>
+			<p><span id="eventText">100</span></p>
+			<p><span id="actorText">100</span></p>
+			<p><span id="genderText">100</span></p>
+			<p><span id="ethnicityText">100</span></p>
 		</div>
 
 		
@@ -549,7 +554,6 @@
 					// console.log("You clicked the hecho!");
 
 					resetAnimation();
-
 
 					//Update the 3vectors for all of the particles loaded
 					for (i = 0; i < dataSetLen; i ++){
@@ -743,7 +747,7 @@
 					d3.select("#legend01Text")
 					.text("Displacement"); 			//hecho = 5
 					d3.select("#legend02Text")
-					.text("Homicide/Massacre");	//hecho = 6
+					.text("Homicide / Massacre");	//hecho = 6
 					d3.select("#legend03Text")
 					.text("Threat");				//hecho = 2
 					d3.select("#legend04Text")
@@ -943,7 +947,7 @@
 
 				// Create a mesh sphere that we place over the datapoint that the users mouse is hovering on
 				var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-				var sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, shading: THREE.FlatShading } );
+				var sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, shading: THREE.FlatShading } );
 				sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);	// bind the geometry to the material and create a mesh
 				scene.add(sphere);		// add this mesh to the scene
 
@@ -1143,6 +1147,48 @@
 			// 	return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
 			// }
 
+			function getTooltipText (_thisDataPt) {
+				//Parse Text For ToolTip Mousover
+				var textList = ["Date: ", "Event: ", "Actor: ", "Gender: ", "Ethnicity: "];
+
+				textList[0] = textList[0] + _thisDataPt.f_ocurrencia_hecho.slice(0, -5);
+
+				//Parse event data into text
+				if(_thisDataPt.param_hecho == 5) {
+					var _eventText = "Displacement";
+				}
+				else if(_thisDataPt.param_hecho == 6) {
+					var _eventText = "Homocide / Massacre";
+				}
+				else if(_thisDataPt.param_hecho == 2) {
+					var _eventText = "Threat";
+				}
+				else {
+					var _eventText = "Other";
+				}
+				textList[1] = textList[1] + _eventText;
+
+				// Parse actor data  into text
+				if (_thisDataPt.autor_guerrillas == 1) {
+					var _actorText = "Guerrillas";
+				}
+				else if(_thisDataPt.autor_paramilitares == 1) {
+					var _actorText = "Paramilitaries";
+				}
+				else if(_thisDataPt.autor_fuerza_publica == 1) {
+					var _actorText = "Armed Forces";
+				} 
+				else {
+					var _actorText = "Other or Non-Identified";
+				}
+				textList[2] = textList[2] + _actorText;
+
+				textList[3] = textList[3] + _thisDataPt.genero_hom;
+				textList[4] = textList[4] + _thisDataPt.pert_etnica;
+
+				return textList;
+			}
+
 
 			// #############################################################################
 			// ##################### THREE JS ANIMATION  AND RENDER ########################
@@ -1217,19 +1263,56 @@
 					if(intersection != null) {
 						// In the event that we DO intersect a particle, intersection is not null and we proceed
 
+						// Find intersection point so we know where to display our div
 						var intersectPosition = intersection.point;
+						// console.log(intersectPosition);
+						var divXLoc = intersectPosition.x;
+						if (divXLoc > windowHalfX) {
+							divXLoc = divXLoc - 350;
+						}
+						var divYLoc = (windowHalfY*2 - intersectPosition.y +camHshift) ;
+						if (divYLoc < windowHalfY) {
+							divYLoc = divYLoc + 150;
+						} else {
+							divYLoc = divYLoc - 150;
+						}
 
 						//Move our sphere to the intersected poisition
 						sphere.position.copy(intersectPosition);
-						sphere.scale.set(5, 5, 5);
+						sphere.scale.set(2, 2, 2);
+
+						//Get this data points parameters as text to display in the tool tip
+						tooltipTextList = getTooltipText(datasetVictims[intersection.index])
 
 						// Tell d3 where to display our tooltip
 						d3.select("#tooltip")
-						.style("left", intersectPosition.x*0.6 + "px")						//eventually should scale the x,y so it is the same size as the space where the pixels are displayed
-						.style("top", (windowHalfY*2 - intersectPosition.y +camHshift)*0.7 + "px")						
-						.select("#value")
-						.text("i: " + intersection.index + ", x pos: " + geometry.vertices[intersection.index].x + ", y pos: " + geometry.vertices[intersection.index].y );
-			   
+						.transition()
+						.duration(100)
+						.style("left", divXLoc + "px")						//eventually should scale the x,y so it is the same size as the space where the pixels are displayed
+						// .style("left", mouseCoordinates[0] + "px")
+						.style("top", divYLoc + "px");
+
+						d3.select("#dateText")
+						.text(tooltipTextList[0]);
+						// .text("i: " + intersection.index + ", x pos: " + geometry.vertices[intersection.index].x + ", y pos: " + geometry.vertices[intersection.index].y );
+						// .text( tooltipTextList[0] + "\n" + tooltipTextList[1] + "\n" + tooltipTextList[2] + "\n" + tooltipTextList[3] +"\n"+ tooltipTextList[4] );
+						
+						d3.select("#tooltip")
+						.select("#eventText")
+						.text(tooltipTextList[1]);
+
+						d3.select("#tooltip")
+						.select("#actorText")
+						.text(tooltipTextList[2]);
+
+						d3.select("#tooltip")
+						.select("#genderText")
+						.text(tooltipTextList[3]);
+
+						d3.select("#tooltip")
+						.select("#ethnicityText")
+						.text(tooltipTextList[4]);
+
 						//Show the tooltip
 						d3.select("#tooltip").classed("hidden", false);
 
