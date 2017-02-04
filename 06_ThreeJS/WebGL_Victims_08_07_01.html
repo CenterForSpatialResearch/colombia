@@ -151,70 +151,107 @@
 				z-index: 100;
 			}
 
-			#sortKey{
-				top: 30px;
+			.color{
+				right: 0px;
 			}
 
-			#sortHecho{
+			#sortKey{
 				top: 60px;
 			}
 
-			#sortActor{
+			#sortHecho{
 				top: 90px;
 			}
 
-			#sortGender{
+			#sortActor{
 				top: 120px;
 			}
 
-			#sortRace{
+			#sortGender{
 				top: 150px;
 			}
 
-			#sortEventDate{
+			#sortRace{
 				top: 180px;
 			}
 
-			#sortReportDate{
+			#sortEventDate{
 				top: 210px;
+			}
+
+			#sortReportDate{
+				top: 240px;
 			}
 
 			/*Buttons to color the data */
 
 			#colorKey{
-				top: 250px;
+				top: 60px;
 			}
 
 			#colorHecho{
-				top: 280px;
+				top: 90px;
 			}
 
 			#colorActor{
-				top: 310px;
+				top: 120px;
 			}
 
 			#colorGender{
-				top: 340px;
+				top: 150px;
 			}
 
 			#colorRace{
-				top: 370px;
+				top: 180px;
 			}
 
 			#colorEventDate{
-				top: 400px;
+				top: 210px;
 			}
 
 			#colorReportDate{
-				top: 430px;
+				top: 240px;
 			}
 
 			/* Styling our timeline */
 
 			.timeline {
 				position: absolute;
-				bottom: 20px;
-				left: 100px;
+				bottom: 7px;
+				/*right: 200px;*/
+				/*text-align: left;*/
+				/*margin:auto;*/
+				/*left: 100px;*/
+			}
+
+			.timeline.hidden {
+				display: none;
+			}
+
+			.timelineTick {
+				background-color: #ffffff;
+				/*position: relative;*/
+				position: absolute;
+				width: 1px;
+				height: 5px;
+				bottom:30px;
+				/*margin: auto;*/
+				/*top:-20px;*/
+				/*bottom: 0px;*/
+				/*left: 100px;*/
+			}
+
+			.timelineTick.hidden{
+				display: none;
+			}
+
+			#timelineText {
+				/*margin: auto;*/
+				/*bottom: 30px;*/
+				text-align: center;
+				-moz-transform: rotate(60.0deg);  /* FF3.5+ */
+				-o-transform: rotate(60.0deg);  /* Opera 10.5 */
+				-webkit-transform: rotate(60.0deg);  /* Saf3.1+, Chrome */ 
 			}
 
 			/* Styling of our tooltip that pops out and displays relevant info on selected pixel */
@@ -255,31 +292,31 @@
 
 		<!-- Title Text and Header -->
 		<div id="victimTitle">
-			<p><span id="titleText">Victims</span> A random sample of XXX,XXX victims of the conflict</p>
+			<p><span id="titleText">Victims</span>   A random sample of 200,000 victims of the conflict</p>
 		</div>
 
 		<div id="legends">
 
 			<div id="legend01">
-				<p><span id="legend01Text">Legend01</span></p>
+				<p><span id="legend01Text"></span></p>
 			</div>
 
 			<div id="legendRect01"></div>
 
 			<div id="legend02">
-				<p><span id="legend02Text">Legend02</span></p>
+				<p><span id="legend02Text"></span></p>
 			</div>
 
 			<div id="legendRect02"></div>
 
 			<div id="legend03">
-				<p><span id="legend03Text">Legend03</span></p>
+				<p><span id="legend03Text"></span></p>
 			</div>
 
 			<div id="legendRect03"></div>
 
 			<div id="legend04">
-				<p><span id="legend04Text">Legend04</span></p>
+				<p><span id="legend04Text"></span></p>
 			</div>
 
 			<div id="legendRect04"></div>
@@ -319,33 +356,35 @@
 
 		<!-- Divs to color -->
 
-		<div class="button" id="colorKey">
+		<div class="button color" id="colorKey">
 			<p id="buttonText">Color Key</p>
 		</div>
 
-		<div class="button" id="colorHecho">
+		<div class="button color" id="colorHecho">
 			<p id="buttonText">Color Hecho</p>
 		</div>
 
-		<div class="button" id="colorActor">
+		<div class="button color" id="colorActor">
 			<p id="buttonText">Color Actor</p>
 		</div>
 
-		<div class="button" id="colorGender">
+		<div class="button color" id="colorGender">
 			<p id="buttonText">Color Gender</p>
 		</div>
 
-		<div class="button" id="colorRace">
+		<div class="button color" id="colorRace">
 			<p id="buttonText">Color Race</p>
 		</div>
 
-		<!--  No longer want to color by date		<div id="colorEventDate">
-			Color by Date
+		 <div class="button color" id="colorEventDate">
+			<p id="buttonText">Color by Event Date</p>
+		</div>
+
+<!-- 		<div class="timeline">
+			<p id="timelineText">Timeline</p>
 		</div> -->
 
-		<div class="timeline">
-			<p id="timelineText">Timeline</p>
-		</div>
+		<!-- <div class="timelineTick"></div> -->
 
 		<!-- Start the tooltip out as class hidden until we scroll over -->
 		<div id="tooltip" class="hidden">
@@ -385,6 +424,15 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 
+			// Setup view settings
+			viewSize = 800;
+			aspectRatio = window.innerWidth / window.innerHeight;			//SQUASH BUG HERE!!!
+			// aspectRatio = 800/1020;
+
+			myHeight = viewSize;
+			myWidth = parseInt(viewSize*aspectRatio);
+			// myWidth = 1020;
+
 			// For best viewing on my display, 1:3 ratio
 			var rectSize = 1; //1
 			var rectSpacerW = rectSpacerH = 1; //3
@@ -403,7 +451,98 @@
 			var datasetVictims = [];
 
 			//Timeline dataset
-			var eventTimeline = [ [0, "1997"], [10000, "2002"], [57832, "2005"], [98832, "2007"], [150832, "2009"] ]
+			// var eventTimeline = [ [0, "1997"], [10000, "2002"], [57832, "2005"], [98832, "2007"], [150832, "2009"] ];
+			var eventTimeline = [ [0, '1985'], [477, '1986'], [1076, '1987'], [1778, '1988'], [2916, '1989'], [4031, '1990'],
+								[5451, '1991'], [6867, '1992'], [8534, '1993'], [10351, '1994'], [12259, '1995'], [15327, '1996'],
+								[19128, '1997'], [25613, '1998'], [31744, '1999'], [38960, '2000'], [53078, '2001'], [69698, '2002'],
+								[89011, '2003'], [101207, '2004'], [112106, '2005'], [123391, '2006'], [134525, '2007'], [146208, '2008'],
+								[156291, '2009'], [162501, '2010'], [167786, '2011'], [174592, '2012'], [182330, '2013'], [190085, '2014'],
+								[197012, '2015'] ];
+			// var reportTimeline = [ [0, "ABC"], [10000, "DEF"], [57832, "HIJ"], [98832, "LKJ"], [150832, "AKL"] ];
+			var reportTimeline = [ [0, ''], [11, '1990'], [18, '1993'], [19, '1994'], [20, '1996'], [79, '1997'], [423, '1998'],
+									[1713, '1999'], [2834, '2000'], [10129, '2001'], [20233, '2002'], [32689, '2003'], [39577, '2004'],
+									[46517, '2005'], [54223, '2006'], [62978, '2007'], [73698, '2008'], [91335, '2009'], [105601, '2010'],
+									[115881, '2011'], [126337, '2012'], [144304, '2013'], [166458, '2014'], [188663, '2015'], [199998, '2016'] ];
+
+			// var horizTimelineShift = 20;
+			var hardCodeTimelineMin = 78;
+			var hardCodeTimelineMax = 942;
+			var hardCodeDataLen = 200000;
+			var timelineTagMod = 2;
+
+			//Create as many timeline date events as there are data
+			d3.select("body").selectAll(".timeline#event")
+				.data(eventTimeline)
+				.enter()
+				.append('div')
+				.attr('class', 'timeline')
+				.attr('id', 'event')
+				.style('left', function(d,i){
+					var canvasX = getXYCoordinates(d[0], myWidth, myHeight)[0];
+					canvasX = map_range(canvasX, getXYCoordinates(0, myWidth, myHeight)[0], getXYCoordinates(hardCodeDataLen, myWidth, myHeight)[0], hardCodeTimelineMin, hardCodeTimelineMax);
+					return canvasX+"px";
+					// return canvasX+horizTimelineShift+"px";
+				})
+				.append('p')
+				.attr('id', 'timelineText')
+				.text(function(d){
+					if (parseInt(d[1])%timelineTagMod ==0){
+						return d[1];
+					}
+				});
+
+			//Create tick marks
+			d3.select("body").selectAll('.timelineTick#event')
+				.data(eventTimeline)
+				.enter()
+				.append('div')
+				.attr('class', 'timelineTick')
+				.attr('id', 'event')
+				.style('left', function(d,i){
+					var canvasX = getXYCoordinates(d[0], myWidth, myHeight)[0];
+					canvasX = map_range(canvasX, getXYCoordinates(0, myWidth, myHeight)[0], getXYCoordinates(hardCodeDataLen, myWidth, myHeight)[0], hardCodeTimelineMin, hardCodeTimelineMax);
+					return canvasX+"px";
+					// return canvasX+horizTimelineShift+"px";
+				});
+
+			//Create as many timeline reported dates as there are data
+			d3.select("body").selectAll(".timeline#report")
+				.data(reportTimeline)
+				.enter()
+				.append('div')
+				.attr('class', 'timeline')
+				.attr('id', 'report')
+				.style('left', function(d,i){
+					var canvasX = getXYCoordinates(d[0], myWidth, myHeight)[0];
+					canvasX = map_range(canvasX, getXYCoordinates(0, myWidth, myHeight)[0], getXYCoordinates(hardCodeDataLen, myWidth, myHeight)[0], hardCodeTimelineMin, hardCodeTimelineMax);
+					return canvasX+"px";
+					// return getXYCoordinates(d[0], myWidth, myHeight)[0]+horizTimelineShift+"px";
+				})
+				.append('p')
+				.attr('id', 'timelineText')
+				.text(function(d){
+					if (parseInt(d[1])%timelineTagMod ==0){
+						return d[1];
+					}
+				});
+			//Create tick marks
+			d3.select("body").selectAll('.timelineTick#report')
+				.data(reportTimeline)
+				.enter()
+				.append('div')
+				.attr('class', 'timelineTick')
+				.attr('id', 'report')
+				.style('left', function(d,i){
+					var canvasX = getXYCoordinates(d[0], myWidth, myHeight)[0];
+					canvasX = map_range(canvasX, getXYCoordinates(0, myWidth, myHeight)[0], getXYCoordinates(hardCodeDataLen, myWidth, myHeight)[0], hardCodeTimelineMin, hardCodeTimelineMax);
+					return canvasX+"px";
+					// return canvasX+horizTimelineShift+"px";
+				});
+
+			//Hide the timelines
+			d3.selectAll(".timeline").classed("hidden", true);
+			//Hide the timeline tick marks
+			d3.selectAll(".timelineTick").classed("hidden", true);
 
 			//Run our script, this function and d3 prevent viz from running before data is fully loaded
 			parseMyFile(myFileDataPath);
@@ -464,37 +603,6 @@
 					});
 				});
 
-				//LEFT OFF HERE
-
-				// console.log("This is my end");
-				// //On start up, sort the data
-				// //Get a substirng list of the years, (convert to full year as integer)
-				// //and srot this, can assume that year data will be sorted same way when
-				// //we have data sorted that way. Record index of the list that we can put to wrold coordinates
-				// //SPlit the list by the number of items there are in teh column,
-				// then find the max value of each colum nof this list. Place these items along the x axis
-
-				// res.forEach(function())
-				// 	console.log(f_ocurrencia_hecho.slice(-2));
-				// }
-
-				// console.log( (rectSize+rectSpacerH) / myHeight);
-
-				// //Create as many timeline events as there are data
-				// d3.select("body")
-				// 	.data(eventTimeline)
-				// 	.enter()
-				// 	.append('div')
-				// 	.attr('class', 'timeline')
-				// 	.style('left', function(d) {
-				// 		var timeLineX = getXYCoordinates(d[0], myWidth, myHeight);
-				// 		// timeLineX = map_range()
-				// 		console.log(timeLineX);
-				// 		return timeLineX+"px";
-				// 	})
-				// 	.style('text', function(d){
-				// 		return d[1]
-				// 	});
 
 				//Once data has loaded, execute rest of code
 				q.await(restOfCode);
@@ -555,23 +663,7 @@
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 					}
 
-					// Update a/o buttons
-					d3.select("#sortHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortRace")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortEventDate")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortReportDate")
-					.style("background-color", "#2f4f4f");
-
-					//Update this button
-					d3.select("#sortKey")
-					.style("background-color", "#d3d3d3");
+					updateUiSortKey();
 
 				});
 
@@ -596,23 +688,7 @@
 
 					}
 
-					// Update a/o buttons
-					d3.select("#sortKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortRace")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortEventDate")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortReportDate")
-					.style("background-color", "#2f4f4f");
-
-					//Update this button
-					d3.select("#sortHecho")
-					.style("background-color", "#d3d3d3");
+					updateUiSortHecho();
 
 				});
 
@@ -636,23 +712,7 @@
 
 					}
 
-					// Update a/o buttons
-					d3.select("#sortKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortRace")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortEventDate")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortReportDate")
-					.style("background-color", "#2f4f4f");
-
-					//Update this button
-					d3.select("#sortActor")
-					.style("background-color", "#d3d3d3");
+					updateUiSortActor();
 
 
 				});
@@ -677,23 +737,7 @@
 
 					}
 
-					// Update a/o buttons
-					d3.select("#sortKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortRace")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortEventDate")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortReportDate")
-					.style("background-color", "#2f4f4f");
-
-					//Update this button
-					d3.select("#sortGender")
-					.style("background-color", "#d3d3d3");
+					updateUiSortGender();
 
 				});
 
@@ -717,23 +761,7 @@
 
 					}
 
-					// Update a/o buttons
-					d3.select("#sortKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortEventDate")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortReportDate")
-					.style("background-color", "#2f4f4f");
-
-					//Update this button
-					d3.select("#sortRace")
-					.style("background-color", "#d3d3d3");
+					updateUiSortRace();
 
 				});
 
@@ -770,25 +798,10 @@
 						// } else {
 						// 	geometry.colors[i] = colorRace(thisDataPt);
 						// }
+
 					}
 
-					// Update a/o buttons
-					d3.select("#sortKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortRace")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortReportDate")
-					.style("background-color", "#2f4f4f");
-
-					//Update this button
-					d3.select("#sortEventDate")
-					.style("background-color", "#d3d3d3");
+					updateUiSortEventDate();
 
 				});
 
@@ -811,23 +824,7 @@
 						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
 					}
 
-					// Update a/o buttons
-					d3.select("#sortKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortRace")
-					.style("background-color", "#2f4f4f");
-					d3.select("#sortEventDate")
-					.style("background-color", "#2f4f4f");
-
-					//Update this button
-					d3.select("#sortReportDate")
-					.style("background-color", "#d3d3d3");
+					updateUiSortReportDate();
 
 				});
 
@@ -844,40 +841,7 @@
 						geometry.colors[i] = colorKey(thisDataPt);
 					}
 
-					//Update legend text
-					d3.select("#legend01Text")
-					.text("");
-					d3.select("#legend02Text")
-					.text("");
-					d3.select("#legend03Text")
-					.text("");
-					d3.select("#legend04Text")
-					.text("Coloring by Key");
-
-					//Update legend rectangels
-					d3.select("#legendRect01")
-					.style("background-color", "#000000");
-					d3.select("#legendRect02")
-					.style("background-color", "#000000");
-					d3.select("#legendRect03")
-					.style("background-color", "#000000");
-					d3.select("#legendRect04")
-					.style("background-color", "#fff");
-
-					//Update a/o color buttons
-					d3.select("#colorHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorRace")
-					.style("background-color", "#2f4f4f");
-
-					//Update this color button
-					d3.select("#colorKey")
-					.style("background-color", "#d3d3d3");
-
+					updateUiColorKey();
 
 				});
 
@@ -891,39 +855,7 @@
 						geometry.colors[i] = colorHecho(thisDataPt);
 					}
 
-					//Update legend text
-					d3.select("#legend01Text")
-					.text("Displacement"); 			//hecho = 5
-					d3.select("#legend02Text")
-					.text("Homicide / Massacre");	//hecho = 6
-					d3.select("#legend03Text")
-					.text("Threat");				//hecho = 2
-					d3.select("#legend04Text")
-					.text("Other");					//hecho = other
-
-					//Update legend rectangels
-					d3.select("#legendRect01")
-					.style("background-color", "#e65c00");
-					d3.select("#legendRect02")
-					.style("background-color", "#00e6bc");
-					d3.select("#legendRect03")
-					.style("background-color", "#3781d1");
-					d3.select("#legendRect04")
-					.style("background-color", "#595959");
-
-					//Update a/o color buttons
-					d3.select("#colorKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorRace")
-					.style("background-color", "#2f4f4f");
-
-					//Update this color button
-					d3.select("#colorHecho")
-					.style("background-color", "#d3d3d3");
+					updateUiColorHecho();
 
 				});
 
@@ -937,39 +869,7 @@
 						geometry.colors[i] = colorActor(thisDataPt);
 					}
 
-					//Update legend
-					d3.select("#legend01Text")
-					.text("Guerrillas");
-					d3.select("#legend02Text")
-					.text("Paramilitaries");
-					d3.select("#legend03Text")
-					.text("Armed Forces");
-					d3.select("#legend04Text")
-					.text("Other or Non-Identified");
-
-					//Update legend rectangels
-					d3.select("#legendRect01")
-					.style("background-color", "#e128aa");
-					d3.select("#legendRect02")
-					.style("background-color", "#aae128");
-					d3.select("#legendRect03")
-					.style("background-color", "#28aae1");
-					d3.select("#legendRect04")
-					.style("background-color", "#595959");
-
-					//Update a/o color buttons
-					d3.select("#colorKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorGender")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorRace")
-					.style("background-color", "#2f4f4f");
-
-					//Update this color button
-					d3.select("#colorActor")
-					.style("background-color", "#d3d3d3");
+					updateUiColorActor();
 
 				});
 
@@ -983,39 +883,7 @@
 						geometry.colors[i] = colorGender(thisDataPt);
 					}
 
-					//Update legend text
-					d3.select("#legend01Text")
-					.text("");
-					d3.select("#legend02Text")
-					.text("Male");
-					d3.select("#legend03Text")
-					.text("Female");
-					d3.select("#legend04Text")
-					.text("Other or N/A");
-
-					//Update legend rectangels
-					d3.select("#legendRect01")
-					.style("background-color", "#000000");
-					d3.select("#legendRect02")
-					.style("background-color", "#421800");
-					d3.select("#legendRect03")
-					.style("background-color", "#013f34");
-					d3.select("#legendRect04")
-					.style("background-color", "#11253e");
-
-					//Update a/o color buttons
-					d3.select("#colorKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorRace")
-					.style("background-color", "#2f4f4f");
-
-					//Update this color button
-					d3.select("#colorGender")
-					.style("background-color", "#d3d3d3");
+					updateUiColorGender();
 
 				});
 
@@ -1029,57 +897,40 @@
 						geometry.colors[i] = colorRace(thisDataPt);
 					}
 
-					//Update legend text
-					d3.select("#legend01Text")
-					.text("N/A");
-					d3.select("#legend02Text")
-					.text("Afrocolombian");
-					d3.select("#legend03Text")
-					.text("Indigenous");
-					d3.select("#legend04Text")
-					.text("Other");
-
-					//Update legend rectangels
-					d3.select("#legendRect01")
-					.style("background-color", "#2db370");
-					d3.select("#legendRect02")
-					.style("background-color", "#b3842d");
-					d3.select("#legendRect03")
-					.style("background-color", "#842db3");
-					d3.select("#legendRect04")
-					.style("background-color", "#595959");
-
-					//Update a/o color buttons
-					d3.select("#colorKey")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorHecho")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorActor")
-					.style("background-color", "#2f4f4f");
-					d3.select("#colorGender")
-					.style("background-color", "#2f4f4f");
-
-					//Update this color button
-					d3.select("#colorRace")
-					.style("background-color", "#d3d3d3");
+					updateUiColorRace();
 
 				});
 
-				// //No date color :/ could make it a color gradient?
-				// d3.select("#colorEventDate").on("click", function() {
-				// 	console.log("You want to color by date!");
+				//Optional color by event date for date color
+				d3.select("#colorEventDate").on("click", function() {
+					console.log("You want to color by event date!");
 
-				// 	// Update colors of the particles
-				// 	for (i = 0; i < dataSetLen; i ++){
+					// Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
 
-				// 		var thisDataPt = datasetVictims[i];
-				// 		geometry.colors[i] = colorEventDate(thisDataPt);
-				// 	}
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorEventDate(thisDataPt);
+					}
 
-				// 	// Color by date gradient
+					// UPDATE UI HERE
 
-				// });
+				});
 
+
+				//Optional color by report date for date color
+				d3.select("#colorReportDate").on("click", function() {
+					console.log("You want to color by report date!");
+
+					// Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorReportDate(thisDataPt);
+					}
+
+					// UPDATE UI HERE
+
+				});
 
 			}
 
@@ -1093,22 +944,26 @@
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				// Setup view settings
-				viewSize = 900;
-				aspectRatio = window.innerWidth / window.innerHeight;
+				// // Setup view settings
+				// viewSize = 900;
+				// aspectRatio = window.innerWidth / window.innerHeight;
 
-				myHeight = viewSize;
-				myWidth = parseInt(viewSize*aspectRatio);
+				// myHeight = viewSize;
+				// myWidth = parseInt(viewSize*aspectRatio);
 
-				myPadding = 50;
-				camViewSize = viewSize + myPadding;
-				camHshift = 10; //10
+				// Try to make camera and padding 0 and move the camera positon to center the grid
+				horizPadding = 80; //50
+				// camViewSize = viewSize + horizPadding;
+				vertPadding = 40; //10
+				horizAdjust4center = 10;
 
 				// Create a Three JS camera and position it to look at our viz
 				// camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
 				// camera = new THREE.OrthographicCamera(-aspectRatio * viewSize / 2, aspectRatio * viewSize / 2, viewSize/2, viewSize/ -2, -100, 100);
-				camera = new THREE.OrthographicCamera(-aspectRatio * camViewSize / 2, aspectRatio * camViewSize / 2, camViewSize/2+camHshift, camViewSize/ -2+camHshift, -100, 100);
-				camera.position.x = myWidth/2;
+				// camera = new THREE.OrthographicCamera(-aspectRatio * camViewSize / 2, aspectRatio * camViewSize / 2, camViewSize/2+vertPadding, camViewSize/ -2+vertPadding, -100, 100);
+				camera = new THREE.OrthographicCamera(-aspectRatio * viewSize / 2 -horizPadding, aspectRatio * viewSize / 2 +horizPadding, viewSize/2+vertPadding, viewSize/ -2-vertPadding, -100, 100);
+
+				camera.position.x = myWidth/2-horizAdjust4center;
 				camera.position.y = myHeight/2;
 				camera.position.z = 1;
 
@@ -1129,14 +984,15 @@
 					var xyCoord = getXYCoordinates(thisDataPt.key, myWidth, myHeight);
 					var vertex = new THREE.Vector3();
 					vertex.startPosition = new THREE.Vector3(xyCoord[0], xyCoord[1], 0);
-					xyCoord = getXYCoordinates(thisDataPt.uniqueRank_report_date, myWidth, myHeight);
+					xyCoord = getXYCoordinates(thisDataPt.uniqueRank_event_date, myWidth, myHeight);
 					vertex.endPosition = new THREE.Vector3(xyCoord[0], xyCoord[1], 0);
 					vertex.direction = vertex.startPosition.clone().sub(vertex.endPosition);
 					vertex.copy(vertex.startPosition);
 
 					geometry.vertices.push( vertex );
 
-					colors[i] = colorKey(thisDataPt);
+					// colors[i] = colorKey(thisDataPt);
+					colors[i] = colorActor(thisDataPt);
 				}
 
 				// Assign our desired color to each piece of geometry
@@ -1164,7 +1020,8 @@
 				// To actually render the scene we execute the following
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
+				// renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setSize(myWidth, myHeight);
 				container.appendChild( renderer.domElement );
 
 				// Displays our framerate in the ULH corner
@@ -1176,7 +1033,11 @@
 				// document.addEventListener( 'touchstart', onDocumentTouchStart, false );
 				// document.addEventListener( 'touchmove', onDocumentTouchMove, false );
 				// document.addEventListener( 'mousedown', onDocumentMouseDown, false);
-				window.addEventListener( 'resize', onWindowResize, false );
+				// window.addEventListener( 'resize', onWindowResize, false );
+
+				// For user friendliness, we identify how we are sorting and coloring to begin by showing the appropriate legend and color
+				updateUiSortEventDate();
+				updateUiColorActor();
 
 			}
 
@@ -1184,30 +1045,30 @@
 			// ######################## THREE JS DOCUMENT EVENTS ###########################
 			// #############################################################################
 
-			function onWindowResize() {
-				//Variables to update whenever the browser window is resized
+			// function onWindowResize() {
+			// 	//Variables to update whenever the browser window is resized
 
-				// console.log("Window resized");
+			// 	// console.log("Window resized");
 
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
+			// 	windowHalfX = window.innerWidth / 2;
+			// 	windowHalfY = window.innerHeight / 2;
 
-				camera.aspect = window.innerWidth / window.innerHeight;
-				aspectRatio = window.innerWidth / window.innerHeight;
+			// 	camera.aspect = window.innerWidth / window.innerHeight;
+			// 	aspectRatio = window.innerWidth / window.innerHeight;
 
-				camera.left   = - camViewSize * aspectRatio / 2;
-				camera.right  =   camViewSize * aspectRatio / 2;
-				camera.top    =   camViewSize / 2 + camHshift;
-				camera.bottom = - camViewSize / 2 + camHshift;
+			// 	camera.left   = - camViewSize * aspectRatio / 2;
+			// 	camera.right  =   camViewSize * aspectRatio / 2;
+			// 	camera.top    =   camViewSize / 2 + vertPadding;
+			// 	camera.bottom = - camViewSize / 2 + vertPadding;
 
-				camera.updateProjectionMatrix();
+			// 	camera.updateProjectionMatrix();
 
-				// myHeight = viewSize;
-				// myWidth = viewSize*aspectRatio;
+			// 	// myHeight = viewSize;
+			// 	// myWidth = viewSize*aspectRatio;
 
-				renderer.setSize( window.innerWidth, window.innerHeight );
+			// 	renderer.setSize( window.innerWidth, window.innerHeight );
 
-			}
+			// }
 
 			function onDocumentMouseMove( event ) {
 				//Update our mouse x and y position whenever the mouse moves
@@ -1217,7 +1078,7 @@
 				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-				// console.log(mouse);
+				// console.log(event.clientX);
 
 			}
 
@@ -1345,11 +1206,21 @@
 				}	
 			}
 
-			// function colorEventDate (_thisDataPt) {
-			// 	var gradientLength = datasetVictims.length;;
+			function colorEventDate (_thisDataPt) {
+				var gradientLength = datasetVictims.length;;
 
-			// 	return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
-			// }
+				var thisColor = parseInt(map_range(_thisDataPt.uniqueRank_event_date, 0, datasetVictims.length, 0, 255));
+
+				return new THREE.Color("rgb(100, " + thisColor + ", 100)");
+			}
+
+			function colorReportDate (_thisDataPt) {
+				var gradientLength = datasetVictims.length;;
+
+				var thisColor = parseInt(map_range(_thisDataPt.uniqueRank_report_date, 0, datasetVictims.length, 0, 255));
+
+				return new THREE.Color("rgb(" + thisColor + ", 100, 100)");
+			}
 
 			function getTooltipText (_thisDataPt) {
 				//Parse Text For ToolTip Mousover
@@ -1462,24 +1333,6 @@
 				// console.log(worldX, worldY);
 
 
-				// //Cycle through the timelines and add data
-				// d3.selectAll(".timeline")
-				// 	.data(eventTimeline)
-				// 	.enter()
-				// 	.style('left', function(d) {
-				// 		var timeLineX = getXYCoordinates(d[0]);
-				// 		// timeLineX = map_range()
-				// 		// console.log(d[1]);
-				// 		return timeLineX+"px";
-				// 	})
-				// 	.style('text', function(d){
-				// 		return d[1]
-				// 	});
-
-				d3.select(".timeline")
-					.style("left", worldX+"px");
-
-
 				//Calculate raycaster intersections (mouseover events) when we are not actively moving particles on screen
 				if (raycastOn) {
 					// Tell three JS where we are drawing our ray from and based on what point
@@ -1506,7 +1359,7 @@
 							divXLoc = divXLoc + 50;
 						}
 
-						// var divYLoc = (windowHalfY*2 - intersectPosition.y +camHshift) ;
+						// var divYLoc = (windowHalfY*2 - intersectPosition.y +vertPadding) ;
 						// var divYLoc = (windowHalfY*2 - intersectPosition.y) ;
 						var divYLoc = worldY;
 						if (divYLoc > windowHalfY) {
@@ -1518,6 +1371,7 @@
 
 						//Move our sphere to the intersected poisition
 						sphere.position.copy(intersectPosition);
+						sphere.visible = true;
 						sphere.scale.set(2, 2, 2);
 
 						//Get this data points parameters as text to display in the tool tip
@@ -1556,19 +1410,387 @@
 						d3.select("#tooltip").classed("hidden", false);
 
 					} else {
+						//Hide our sphere cursor
+						sphere.visible = false;
+
 						//Hide the tooltip
 						d3.select("#tooltip").classed("hidden", true);
 					}
 				} else {
 					//Hide the tooltip
 					d3.select("#tooltip").classed("hidden", true);
+
 				}
-
-
 
 				// Three JS render this scene with this camera
 				renderer.render( scene, camera );
 
+			}
+
+			//Update UI Elements
+			function updateUiSortKey() {
+				// Update a/o buttons
+				d3.select("#sortHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortRace")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortEventDate")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortReportDate")
+				.style("background-color", "#2f4f4f");
+
+				//Update this button
+				d3.select("#sortKey")
+				.style("background-color", "#d3d3d3");
+
+				//Hide the timelines if any show
+				d3.selectAll(".timeline").classed("hidden", true);
+				//Hide the ticks if any show
+				d3.selectAll(".timelineTick").classed("hidden", true);
+			}
+
+			function updateUiSortHecho() {
+				// Update a/o buttons
+				d3.select("#sortKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortRace")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortEventDate")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortReportDate")
+				.style("background-color", "#2f4f4f");
+
+				//Update this button
+				d3.select("#sortHecho")
+				.style("background-color", "#d3d3d3");
+
+				//Hide the timelines if any show
+				d3.selectAll(".timeline").classed("hidden", true);
+				//Hide the ticks if any show
+				d3.selectAll(".timelineTick").classed("hidden", true);
+			}
+
+			function updateUiSortActor() {
+				// Update a/o buttons
+				d3.select("#sortKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortRace")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortEventDate")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortReportDate")
+				.style("background-color", "#2f4f4f");
+
+				//Update this button
+				d3.select("#sortActor")
+				.style("background-color", "#d3d3d3");
+
+				//Hide the timelines if any show
+				d3.selectAll(".timeline").classed("hidden", true);
+				//Hide the ticks if any show
+				d3.selectAll(".timelineTick").classed("hidden", true);
+			}
+
+			function updateUiSortGender() {
+				// Update a/o buttons
+				d3.select("#sortKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortRace")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortEventDate")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortReportDate")
+				.style("background-color", "#2f4f4f");
+
+				//Update this button
+				d3.select("#sortGender")
+				.style("background-color", "#d3d3d3");
+
+				//Hide the timelines if any show
+				d3.selectAll(".timeline").classed("hidden", true);
+				//Hide the ticks if any show
+				d3.selectAll(".timelineTick").classed("hidden", true);
+			}
+
+			function updateUiSortRace() {
+				// Update a/o buttons
+				d3.select("#sortKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortEventDate")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortReportDate")
+				.style("background-color", "#2f4f4f");
+
+				//Update this button
+				d3.select("#sortRace")
+				.style("background-color", "#d3d3d3");
+
+				//Hide the timelines if any show
+				d3.selectAll(".timeline").classed("hidden", true);
+				//Hide the ticks if any show
+				d3.selectAll(".timelineTick").classed("hidden", true);
+			}
+
+			function updateUiSortEventDate() {
+				// Update a/o buttons
+				d3.select("#sortKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortRace")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortReportDate")
+				.style("background-color", "#2f4f4f");
+
+				//Update this button
+				d3.select("#sortEventDate")
+				.style("background-color", "#d3d3d3");
+
+				//Show the event timeline
+				d3.selectAll(".timeline#event").classed("hidden", false);
+				//Show the timeline event ticks
+				d3.selectAll(".timelineTick#event").classed("hidden", false);
+
+				//Hide the other timeline
+				d3.selectAll(".timeline#report").classed("hidden", true);
+				//Hide the timeline event ticks
+				d3.selectAll(".timelineTick#report").classed("hidden", true);
+			}
+
+			function updateUiSortReportDate() {
+				// Update a/o buttons
+				d3.select("#sortKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortRace")
+				.style("background-color", "#2f4f4f");
+				d3.select("#sortEventDate")
+				.style("background-color", "#2f4f4f");
+
+				//Update this button
+				d3.select("#sortReportDate")
+				.style("background-color", "#d3d3d3");
+
+				//Show the report timeline
+				d3.selectAll(".timeline#report").classed("hidden", false);
+				//Show the timeline event ticks
+				d3.selectAll(".timelineTick#report").classed("hidden", false);
+
+				//Hide the other timeline
+				d3.selectAll(".timeline#event").classed("hidden", true);
+				//Hide the timeline event ticks
+				d3.selectAll(".timelineTick#event").classed("hidden", true);
+			}
+
+			function updateUiColorKey() {
+				//Update legend text
+				d3.select("#legend01Text")
+				.text("");
+				d3.select("#legend02Text")
+				.text("");
+				d3.select("#legend03Text")
+				.text("");
+				d3.select("#legend04Text")
+				.text("Coloring by Key");
+
+				//Update legend rectangels
+				d3.select("#legendRect01")
+				.style("background-color", "#000000");
+				d3.select("#legendRect02")
+				.style("background-color", "#000000");
+				d3.select("#legendRect03")
+				.style("background-color", "#000000");
+				d3.select("#legendRect04")
+				.style("background-color", "#fff");
+
+				//Update a/o color buttons
+				d3.select("#colorHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorRace")
+				.style("background-color", "#2f4f4f");
+
+				//Update this color button
+				d3.select("#colorKey")
+				.style("background-color", "#d3d3d3");
+			}
+
+			function updateUiColorHecho() {
+				//Update legend text
+				d3.select("#legend01Text")
+				.text("Displacement"); 			//hecho = 5
+				d3.select("#legend02Text")
+				.text("Homicide / Massacre");	//hecho = 6
+				d3.select("#legend03Text")
+				.text("Threat");				//hecho = 2
+				d3.select("#legend04Text")
+				.text("Other");					//hecho = other
+
+				//Update legend rectangels
+				d3.select("#legendRect01")
+				.style("background-color", "#e65c00");
+				d3.select("#legendRect02")
+				.style("background-color", "#00e6bc");
+				d3.select("#legendRect03")
+				.style("background-color", "#3781d1");
+				d3.select("#legendRect04")
+				.style("background-color", "#595959");
+
+				//Update a/o color buttons
+				d3.select("#colorKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorRace")
+				.style("background-color", "#2f4f4f");
+
+				//Update this color button
+				d3.select("#colorHecho")
+				.style("background-color", "#d3d3d3");
+			}
+
+			function updateUiColorActor() {
+				//Update legend
+				d3.select("#legend01Text")
+				.text("Guerrillas");
+				d3.select("#legend02Text")
+				.text("Paramilitaries");
+				d3.select("#legend03Text")
+				.text("Armed Forces");
+				d3.select("#legend04Text")
+				.text("Other or Non-Identified");
+
+				//Update legend rectangels
+				d3.select("#legendRect01")
+				.style("background-color", "#e128aa");
+				d3.select("#legendRect02")
+				.style("background-color", "#aae128");
+				d3.select("#legendRect03")
+				.style("background-color", "#28aae1");
+				d3.select("#legendRect04")
+				.style("background-color", "#595959");
+
+				//Update a/o color buttons
+				d3.select("#colorKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorGender")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorRace")
+				.style("background-color", "#2f4f4f");
+
+				//Update this color button
+				d3.select("#colorActor")
+				.style("background-color", "#d3d3d3");
+			}
+
+			function updateUiColorGender() {
+				//Update legend text
+				d3.select("#legend01Text")
+				.text("");
+				d3.select("#legend02Text")
+				.text("Male");
+				d3.select("#legend03Text")
+				.text("Female");
+				d3.select("#legend04Text")
+				.text("Other or N/A");
+
+				//Update legend rectangels
+				d3.select("#legendRect01")
+				.style("background-color", "#000000");
+				d3.select("#legendRect02")
+				.style("background-color", "#421800");
+				d3.select("#legendRect03")
+				.style("background-color", "#013f34");
+				d3.select("#legendRect04")
+				.style("background-color", "#11253e");
+
+				//Update a/o color buttons
+				d3.select("#colorKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorRace")
+				.style("background-color", "#2f4f4f");
+
+				//Update this color button
+				d3.select("#colorGender")
+				.style("background-color", "#d3d3d3");
+			}
+
+			function updateUiColorRace() {
+				//Update legend text
+				d3.select("#legend01Text")
+				.text("N/A");
+				d3.select("#legend02Text")
+				.text("Afrocolombian");
+				d3.select("#legend03Text")
+				.text("Indigenous");
+				d3.select("#legend04Text")
+				.text("Other");
+
+				//Update legend rectangels
+				d3.select("#legendRect01")
+				.style("background-color", "#2db370");
+				d3.select("#legendRect02")
+				.style("background-color", "#b3842d");
+				d3.select("#legendRect03")
+				.style("background-color", "#842db3");
+				d3.select("#legendRect04")
+				.style("background-color", "#595959");
+
+				//Update a/o color buttons
+				d3.select("#colorKey")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorHecho")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorActor")
+				.style("background-color", "#2f4f4f");
+				d3.select("#colorGender")
+				.style("background-color", "#2f4f4f");
+
+				//Update this color button
+				d3.select("#colorRace")
+				.style("background-color", "#d3d3d3");
 			}
 
 			//Given a data index return the x and y coordinates in the array

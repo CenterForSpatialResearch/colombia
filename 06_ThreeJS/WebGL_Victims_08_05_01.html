@@ -213,8 +213,12 @@
 
 			.timeline {
 				position: absolute;
-				bottom: 20px;
+				bottom: 0px;
 				left: 100px;
+			}
+
+			.timeline.hidden {
+				display: none;
 			}
 
 			/* Styling of our tooltip that pops out and displays relevant info on selected pixel */
@@ -343,9 +347,9 @@
 			Color by Date
 		</div> -->
 
-		<div class="timeline">
+<!-- 		<div class="timeline">
 			<p id="timelineText">Timeline</p>
-		</div>
+		</div> -->
 
 		<!-- Start the tooltip out as class hidden until we scroll over -->
 		<div id="tooltip" class="hidden">
@@ -385,6 +389,13 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 
+			// Setup view settings
+			viewSize = 900;
+			aspectRatio = window.innerWidth / window.innerHeight;
+
+			myHeight = viewSize;
+			myWidth = parseInt(viewSize*aspectRatio);
+
 			// For best viewing on my display, 1:3 ratio
 			var rectSize = 1; //1
 			var rectSpacerW = rectSpacerH = 1; //3
@@ -404,6 +415,45 @@
 
 			//Timeline dataset
 			var eventTimeline = [ [0, "1997"], [10000, "2002"], [57832, "2005"], [98832, "2007"], [150832, "2009"] ]
+
+			var reportTimeline = [ [0, "ABC"], [10000, "DEF"], [57832, "HIJ"], [98832, "LKJ"], [150832, "AKL"] ]
+
+			var horizTimelineShift = 20;
+
+			//Create as many timeline events as there are data
+			d3.select("body").selectAll(".timeline#event")
+				.data(eventTimeline)
+				.enter()
+				.append('div')
+				.attr('class', 'timeline')
+				.attr('id', 'event')
+				.style('left', function(d,i){
+					return getXYCoordinates(d[0], myWidth, myHeight)[0]+horizTimelineShift+"px";
+				})
+				.append('p')
+				.attr('id', 'timelineText')
+				.text(function(d){
+					return d[1];
+				});
+
+			//Create as many timeline events as there are data
+			d3.select("body").selectAll(".timeline#report")
+				.data(reportTimeline)
+				.enter()
+				.append('div')
+				.attr('class', 'timeline')
+				.attr('id', 'report')
+				.style('left', function(d,i){
+					return getXYCoordinates(d[0], myWidth, myHeight)[0]+horizTimelineShift+"px";
+				})
+				.append('p')
+				.attr('id', 'timelineText')
+				.text(function(d){
+					return d[1];
+				});
+
+			//Hide the timelines
+			d3.selectAll(".timeline").classed("hidden", true);
 
 			//Run our script, this function and d3 prevent viz from running before data is fully loaded
 			parseMyFile(myFileDataPath);
@@ -464,37 +514,6 @@
 					});
 				});
 
-				//LEFT OFF HERE
-
-				// console.log("This is my end");
-				// //On start up, sort the data
-				// //Get a substirng list of the years, (convert to full year as integer)
-				// //and srot this, can assume that year data will be sorted same way when
-				// //we have data sorted that way. Record index of the list that we can put to wrold coordinates
-				// //SPlit the list by the number of items there are in teh column,
-				// then find the max value of each colum nof this list. Place these items along the x axis
-
-				// res.forEach(function())
-				// 	console.log(f_ocurrencia_hecho.slice(-2));
-				// }
-
-				// console.log( (rectSize+rectSpacerH) / myHeight);
-
-				// //Create as many timeline events as there are data
-				// d3.select("body")
-				// 	.data(eventTimeline)
-				// 	.enter()
-				// 	.append('div')
-				// 	.attr('class', 'timeline')
-				// 	.style('left', function(d) {
-				// 		var timeLineX = getXYCoordinates(d[0], myWidth, myHeight);
-				// 		// timeLineX = map_range()
-				// 		console.log(timeLineX);
-				// 		return timeLineX+"px";
-				// 	})
-				// 	.style('text', function(d){
-				// 		return d[1]
-				// 	});
 
 				//Once data has loaded, execute rest of code
 				q.await(restOfCode);
@@ -573,6 +592,9 @@
 					d3.select("#sortKey")
 					.style("background-color", "#d3d3d3");
 
+					//Hide the timelines if any show
+					d3.selectAll(".timeline").classed("hidden", true);
+
 				});
 
 				
@@ -614,6 +636,9 @@
 					d3.select("#sortHecho")
 					.style("background-color", "#d3d3d3");
 
+					//Hide the timelines if any show
+					d3.selectAll(".timeline").classed("hidden", true);
+
 				});
 
 				d3.select("#sortActor").on("click", function() {
@@ -653,6 +678,9 @@
 					//Update this button
 					d3.select("#sortActor")
 					.style("background-color", "#d3d3d3");
+
+					//Hide the timelines if any show
+					d3.selectAll(".timeline").classed("hidden", true);
 
 
 				});
@@ -695,6 +723,9 @@
 					d3.select("#sortGender")
 					.style("background-color", "#d3d3d3");
 
+					//Hide the timelines if any show
+					d3.selectAll(".timeline").classed("hidden", true);
+
 				});
 
 				d3.select("#sortRace").on("click", function() {
@@ -735,6 +766,9 @@
 					d3.select("#sortRace")
 					.style("background-color", "#d3d3d3");
 
+					//Hide the timelines if any show
+					d3.selectAll(".timeline").classed("hidden", true);
+
 				});
 
 				d3.select("#sortEventDate").on("click", function() {
@@ -770,6 +804,7 @@
 						// } else {
 						// 	geometry.colors[i] = colorRace(thisDataPt);
 						// }
+
 					}
 
 					// Update a/o buttons
@@ -789,6 +824,11 @@
 					//Update this button
 					d3.select("#sortEventDate")
 					.style("background-color", "#d3d3d3");
+
+					//Show the event timeline
+					d3.selectAll(".timeline#event").classed("hidden", false);
+					//Hide the other timeline
+					d3.selectAll(".timeline#report").classed("hidden", true);
 
 				});
 
@@ -828,6 +868,11 @@
 					//Update this button
 					d3.select("#sortReportDate")
 					.style("background-color", "#d3d3d3");
+
+					//Show the report timeline
+					d3.selectAll(".timeline#report").classed("hidden", false);
+					//Hide the other timeline
+					d3.selectAll(".timeline#event").classed("hidden", true);
 
 				});
 
@@ -1093,12 +1138,12 @@
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				// Setup view settings
-				viewSize = 900;
-				aspectRatio = window.innerWidth / window.innerHeight;
+				// // Setup view settings
+				// viewSize = 900;
+				// aspectRatio = window.innerWidth / window.innerHeight;
 
-				myHeight = viewSize;
-				myWidth = parseInt(viewSize*aspectRatio);
+				// myHeight = viewSize;
+				// myWidth = parseInt(viewSize*aspectRatio);
 
 				myPadding = 50;
 				camViewSize = viewSize + myPadding;
@@ -1217,7 +1262,7 @@
 				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-				// console.log(mouse);
+				// console.log(event.clientX);
 
 			}
 
@@ -1460,24 +1505,6 @@
 				// console.log(worldX);
 				worldY = parseInt(map_range(mouse.y, -1, 1, windowHalfY*2, 0));
 				// console.log(worldX, worldY);
-
-
-				// //Cycle through the timelines and add data
-				// d3.selectAll(".timeline")
-				// 	.data(eventTimeline)
-				// 	.enter()
-				// 	.style('left', function(d) {
-				// 		var timeLineX = getXYCoordinates(d[0]);
-				// 		// timeLineX = map_range()
-				// 		// console.log(d[1]);
-				// 		return timeLineX+"px";
-				// 	})
-				// 	.style('text', function(d){
-				// 		return d[1]
-				// 	});
-
-				d3.select(".timeline")
-					.style("left", worldX+"px");
 
 
 				//Calculate raycaster intersections (mouseover events) when we are not actively moving particles on screen
