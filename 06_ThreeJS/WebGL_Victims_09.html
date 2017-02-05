@@ -545,8 +545,10 @@
 				.append('p')
 				.attr('id', 'timelineText')
 				.text(function(d){
-					if (parseInt(d[1])%timelineTagMod ==0){
-						return d[1];
+					if (parseInt(d[1]) != 1998 && parseInt(d[1]) != 1996 && parseInt(d[1]) != 1994) {						//1998 and 1996 overlaps so we hide it
+						if (parseInt(d[1])%timelineTagMod ==0){
+							return d[1];
+						}
 					}
 				});
 			//Create tick marks
@@ -1051,8 +1053,8 @@
 				container.appendChild( renderer.domElement );
 
 				// Displays our framerate in the ULH corner
-				stats = new Stats();
-				container.appendChild( stats.dom );
+				// stats = new Stats();
+				// container.appendChild( stats.dom );
 
 				// Event listeners that listen for when the mouse is moved or when the window is resized
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -1344,7 +1346,7 @@
 
 				// Tell Three JS to redner the scene and update our stats
 				render();
-				stats.update();
+				// stats.update();
 
 			}
 
