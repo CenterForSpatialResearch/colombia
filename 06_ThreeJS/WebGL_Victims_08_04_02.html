@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+		<title>three.js webgl - particles</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<script src="/06_ThreeJS/build/three.js"></script>
+		<script src="/06_ThreeJS/js/Detector.js"></script>
+		<script src="/06_ThreeJS/js/libs/stats.min.js"></script>
+		<script src="/06_ThreeJS/js/libs/tween.min.js"></script>
+		<script type="text/javascript" src="d3/d3.js"></script>
+		<script src="https://d3js.org/d3-queue.v3.min.js"></script>
+		<style>
+			/* 
+			*********** Document CSS styling
+			*/
+			
+			body {
+				color: #fff;
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+				font-family: sans-serif;
+				font-size:13px;
+				text-align:center;
+				/*font-weight: bold;*/
+				/*text-align:center;*/
+			}
+
+			p {
+				/*color: #fff;*/
+				/*font-family: Monospace;*/
+				font-size:8px;
+				text-align: left;
+			}
+
+
+			a {
+				color:#0078ff;
+			}
+
+
+			/****** Header and Legend CSS Info *********/
+
+			#victimTitle{
+				position: absolute;
+				top: 0px; width:100%;
+				padding: 5px;
+				text-align: left;
+			}
+
+			#titleText{
+				/*font-family: Monospace;*/
+				font-size:13px;
+				text-align: left;
+			}
+
+			#buttonText{
+				text-align:center;
+			}
+
+			#legends{
+				position: absolute;
+				/*width:100px;*/
+				right:300px;
+				padding:5px;
+			}
+
+			#legend01{
+				position: absolute;
+				top:0px;
+				/*padding:5px;*/
+				left: 0px;
+				width:70px;
+			}
+
+			#legend02{
+				position: absolute;
+				top:0px;
+				/*padding:5px;*/
+				left: 80px;
+				/*right: 5px;*/
+				width:70px;
+			}
+
+			#legend03{
+				position: absolute;
+				top:0px;
+				left: 160px;
+				width:70px;
+			}
+
+			#legend04{
+				position: absolute;
+				top:0px;
+				left: 240px;
+				width:70px;
+			}
+
+			#legendRect01{
+				position: absolute;
+				/*vertical-align: bottom;*/
+				/*float: left;*/
+				top: 10px;
+				left: -8px;
+				width: 5px;
+				height: 5px;
+				background-color: #000000;
+			}
+
+			#legendRect02{
+				position: absolute;
+				top: 10px;
+				left: 72px;
+				width: 5px;
+				height: 5px;
+				background-color: #000000;
+			}
+
+			#legendRect03{
+				position: absolute;
+				top: 10px;
+				left: 152px;
+				width: 5px;
+				height: 5px;
+				background-color: #000000;
+			}
+
+			#legendRect04{
+				position: absolute;
+				top: 10px;
+				left: 232px;
+				width: 5px;
+				height: 5px;
+				background-color: #000000;
+			}
+
+			/*
+			*********** CSS Styling of Buttons to sort and color data
+			*/
+
+			/* Buttons that sort the data */
+
+			.button{
+				background-color: #2f4f4f;
+				position: absolute;
+				width: 75px;
+				/*height: 5px;*/
+				/*padding: 2px;*/
+				z-index: 100;
+			}
+
+			#sortKey{
+				top: 30px;
+			}
+
+			#sortHecho{
+				top: 60px;
+			}
+
+			#sortActor{
+				top: 90px;
+			}
+
+			#sortGender{
+				top: 120px;
+			}
+
+			#sortRace{
+				top: 150px;
+			}
+
+			#sortEventDate{
+				top: 180px;
+			}
+
+			#sortReportDate{
+				top: 210px;
+			}
+
+			/*Buttons to color the data */
+
+			#colorKey{
+				top: 250px;
+			}
+
+			#colorHecho{
+				top: 280px;
+			}
+
+			#colorActor{
+				top: 310px;
+			}
+
+			#colorGender{
+				top: 340px;
+			}
+
+			#colorRace{
+				top: 370px;
+			}
+
+			#colorEventDate{
+				top: 400px;
+			}
+
+			#colorReportDate{
+				top: 430px;
+			}
+
+			/* Styling our timeline */
+
+			.timeline {
+				position: absolute;
+				bottom: 20px;
+				left: 100px;
+			}
+
+			/* Styling of our tooltip that pops out and displays relevant info on selected pixel */
+
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 5px;
+				background-color: #000000;
+				/*-webkit-border-radius: 10px;*/
+				/*-moz-border-radius: 10px;*/
+				/*border-radius: 10px;*/
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			/*Hide the tooltip when we are not scrolling over data*/
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			/*Tooltip paragraph styling*/
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 12px;
+				line-height: 18px;
+			}
+
+
+
+		</style>
+	</head>
+	<body>
+
+		<!-- Title Text and Header -->
+		<div id="victimTitle">
+			<p><span id="titleText">Victims</span> A random sample of XXX,XXX victims of the conflict</p>
+		</div>
+
+		<div id="legends">
+
+			<div id="legend01">
+				<p><span id="legend01Text">Legend01</span></p>
+			</div>
+
+			<div id="legendRect01"></div>
+
+			<div id="legend02">
+				<p><span id="legend02Text">Legend02</span></p>
+			</div>
+
+			<div id="legendRect02"></div>
+
+			<div id="legend03">
+				<p><span id="legend03Text">Legend03</span></p>
+			</div>
+
+			<div id="legendRect03"></div>
+
+			<div id="legend04">
+				<p><span id="legend04Text">Legend04</span></p>
+			</div>
+
+			<div id="legendRect04"></div>
+
+		</div>
+
+
+		<!-- Divs to sort and color data. D3 listens to these divs and updates GL once they are clicked -->
+
+		<div class="button" id="sortKey">
+			<p id="buttonText">Sort Key</p>
+		</div>
+
+		<div class="button" id="sortHecho">
+			<p id="buttonText">Sort Hecho</p>
+		</div>
+
+		<div class="button" id="sortActor">
+			<p id="buttonText">Sort Actor</p>
+		</div>
+
+		<div class="button" id="sortGender">
+			<p id="buttonText">Sort Gender</p>
+		</div>
+
+		<div class="button" id="sortRace">
+			<p id="buttonText">Sort Race</p>
+		</div>
+
+		<div class="button" id="sortEventDate">
+			<p id="buttonText">Sort Event Date</p>
+		</div>
+
+		<div class="button" id="sortReportDate">
+			<p id="buttonText">Sort Report Date</p>
+		</div>
+
+		<!-- Divs to color -->
+
+		<div class="button" id="colorKey">
+			<p id="buttonText">Color Key</p>
+		</div>
+
+		<div class="button" id="colorHecho">
+			<p id="buttonText">Color Hecho</p>
+		</div>
+
+		<div class="button" id="colorActor">
+			<p id="buttonText">Color Actor</p>
+		</div>
+
+		<div class="button" id="colorGender">
+			<p id="buttonText">Color Gender</p>
+		</div>
+
+		<div class="button" id="colorRace">
+			<p id="buttonText">Color Race</p>
+		</div>
+
+		<!--  No longer want to color by date		<div id="colorEventDate">
+			Color by Date
+		</div> -->
+
+<!-- 		<div class="timeline">
+			<p id="timelineText">Timeline</p>
+		</div> -->
+
+		<!-- Start the tooltip out as class hidden until we scroll over -->
+		<div id="tooltip" class="hidden">
+			<p><span id="dateText">100</span></p>
+			<p><span id="eventText">100</span></p>
+			<p><span id="actorText">100</span></p>
+			<p><span id="genderText">100</span></p>
+			<p><span id="ethnicityText">100</span></p>
+		</div>
+
+		
+		<script>
+
+			// #############################################################################
+			// #############################################################################
+			// ########################## JAVASCRIPT + THREE.JS ############################
+			// #############################################################################
+			// #############################################################################
+
+			// Webgl error message
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			// #############################################################################
+			// ############################# GLOBAL VARIABLES ##############################
+			// #############################################################################
+
+			var container, stats;
+			var fieldGeom, camera, scene, renderer, raycaster, particles, geometry, materials = [], colors = [], parameters, i, h, color, size;
+			var clock = new THREE.Clock();
+
+			var viewSize, aspectRatio, myWidth, myHeight;
+
+			var needUpdate = false;
+
+			var duration = currentTime = 3;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			// Setup view settings
+			viewSize = 900;
+			aspectRatio = window.innerWidth / window.innerHeight;
+
+			myHeight = viewSize;
+			myWidth = parseInt(viewSize*aspectRatio);
+
+			// For best viewing on my display, 1:3 ratio
+			var rectSize = 1; //1
+			var rectSpacerW = rectSpacerH = 1; //3
+
+			var mouse = new THREE.Vector2();
+			var threshold = rectSpacerW*2;
+			var sphere;
+			var raycastOn;
+
+			// var myFileDataPath = "/06_ThreeJS/data/20k_test_W_sorts.csv";
+			// var myFileDataPath = "/06_ThreeJS/data/SmallTest200k.csv";
+			var myFileDataPath = "/06_ThreeJS/data/200k_opened_correct_wcs_nocomma_OUTPUT.csv";
+			// var myFileDataPath = "/06_ThreeJS/data/50k_opened_correct_wcs_nocomma_OUTPUT.csv";
+
+			//Victims dataset
+			var datasetVictims = [];
+
+			//Timeline dataset
+			var eventTimeline = [ [0, "1997"], [10000, "2002"], [57832, "2005"], [98832, "2007"], [150832, "2009"] ]
+
+			//Create as many timeline events as there are data
+			//NEED TO SOMEHOW APPEND OT THE BODY!!
+			// d3.select(".timeline")
+			// 	.data(eventTimeline)
+			// 	.enter()
+			// 	.append('div')
+			// 	.attr('class', 'timeline')
+			// 	.style('left', function(d,i){
+			// 		return i*100+"px";
+			// 		// console.log("hi");
+			// 	})
+			// 	.append('p')
+			// 	.attr('id', 'timelineText')
+			// 	.text(function(d){
+			// 		return d[1];
+			// 	});
+
+			d3.select("body").selectAll(".timeline")
+				.data(eventTimeline)
+				.enter()
+				.append('div')
+				.attr('class', 'timeline')
+				.style('left', function(d,i){
+					return i*100+"px";
+					// console.log("hi");
+				})
+				.append('p')
+				.attr('id', 'timelineText')
+				.text(function(d){
+					return d[1];
+				});
+
+			//Run our script, this function and d3 prevent viz from running before data is fully loaded
+			parseMyFile(myFileDataPath);
+
+
+			// #############################################################################
+			// ###### Parses data and establishes queue to load data before viz is run #####
+			// #############################################################################
+
+
+			function parseMyFile(myFileName) {
+				var q = d3.queue();
+				q.defer(function(callback) {
+					d3.csv(myFileName, function(res) {
+
+						//By default, csv loads all data as strings, here we parse the data into
+						//other data types
+						res.forEach(function(d,i) {
+							d.key = i;							//we also add a temporary key value
+							d.cod_persona = +d.cod_persona;
+
+							d.param_hecho = +d.param_hecho;
+
+							d.uniqueRank_param_hecho = +d.uniqueRank_param_hecho;
+							d.uniqueRank_pert_etnica = +d.uniqueRank_pert_etnica;
+							d.uniqueRank_genero_hom = +d.uniqueRank_genero_hom;
+							d.uniqueRank_event_date = +d.uniqueRank_event_date;
+							d.uniqueRank_actors = +d.uniqueRank_actors;
+							d.uniqueRank_report_date = +d.uniqueRank_report_date;
+
+
+							//Reclassifying race data col
+							if (d.pert_etnica == "Negro(a) o Afrocolombiano(a)") {
+								d.pert_etnica = "Afrocolombian";
+							}
+							else if (d.pert_etnica == "Gitano(a) ROM") {
+								d.pert_etnica = "ROM";
+							}
+							else if (d.pert_etnica == "Indigena") {
+								d.pert_etnica = "Indigenous";
+							}
+							else if (d.pert_etnica == "Palenquero") {
+								d.pert_etnica = "Palenquero"
+							}
+							else if (d.pert_etnica == "Raizal del Archipielago de San Andres y Providencia") {
+								d.pert_etnica = "San Andres Providencia";
+							}
+							else {
+								d.pert_etnica = "None";
+							}
+
+							d.thisColor = [0,0,0];
+
+						});
+
+						//Passes data to the queue once we have loaded datat
+						callback(null, res);
+					});
+				});
+
+				//LEFT OFF HERE
+
+				// console.log("This is my end");
+				// //On start up, sort the data
+				// //Get a substirng list of the years, (convert to full year as integer)
+				// //and srot this, can assume that year data will be sorted same way when
+				// //we have data sorted that way. Record index of the list that we can put to wrold coordinates
+				// //SPlit the list by the number of items there are in teh column,
+				// then find the max value of each colum nof this list. Place these items along the x axis
+
+				// res.forEach(function())
+				// 	console.log(f_ocurrencia_hecho.slice(-2));
+				// }
+
+				// console.log( (rectSize+rectSpacerH) / myHeight);
+
+				// //Create as many timeline events as there are data
+				// d3.select("body")
+				// 	.data(eventTimeline)
+				// 	.enter()
+				// 	.append('div')
+				// 	.attr('class', 'timeline')
+				// 	.style('left', function(d,i){
+				// 		return i*100+"px";
+				// 		console.log("hi");
+				// 	})
+				// 	.append('p')
+				// 	.text("hello!");
+
+				//Once data has loaded, execute rest of code
+				q.await(restOfCode);
+			};
+
+			// #############################################################################
+			// ################# AFTER DATA HAS LOADED, RUN THE REST #######################
+			// #############################################################################
+
+			function restOfCode(err, results) {
+
+				// Set dataset to the data d3 just loaded in the queue
+				datasetVictims = results;
+				var dataSetLen = datasetVictims.length;
+				// var dataSetLen = 100000;
+
+				// Three JS functions to first initialize and then animate the scene
+				init();
+				animate();
+
+				// #############################################################
+				// ################# D3 div Click Events #######################
+				// #############################################################
+
+				// ### Sorting events ###
+
+				//D3 to Handle click events on sorting our divs
+				//d3 listens for when our divs are clicked and then prompts the animation to reset
+
+				d3.select("#sortKey").on("click", function() {
+					// console.log("You clicked the key!");
+
+					// Tell Three JS that we need to update the animation
+					resetAnimation();
+
+					// Update the 3vectors for all of the particles loaded
+					// Each particle has an associated vector, the intial position being the current position of the particle and
+					// the final positoin being the indexed XY coordinate of the particle depending on which sort the user has picked
+					// Using a timer that is reset each time one of thee sorts is clicked, the animation moves the particle in a straight line
+					// from the initial to the final position by multiplying the vector between the two points by 1/(time left in transition
+					// animation). Here, for each particle we simply update the start position to the particles current position, the end
+					// position to be the user specified sort XY coordinate, and the direction to be the vector b/w those two points.
+					// The particles are moved along these vectors in the animate portion of the code.
+
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						// Make sure the start position is the current 3vector
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);	
+						// Find the new desired XY coordinates	
+						var newXY = getXYCoordinates(thisDataPt.key, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						// Compute the vector between these two points
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+					}
+
+					// Update a/o buttons
+					d3.select("#sortHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortRace")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortEventDate")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortReportDate")
+					.style("background-color", "#2f4f4f");
+
+					//Update this button
+					d3.select("#sortKey")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				
+				d3.select("#sortHecho").on("click", function() {
+					// console.log("You clicked the hecho!");
+
+					resetAnimation();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_param_hecho, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+					// Update a/o buttons
+					d3.select("#sortKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortRace")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortEventDate")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortReportDate")
+					.style("background-color", "#2f4f4f");
+
+					//Update this button
+					d3.select("#sortHecho")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				d3.select("#sortActor").on("click", function() {
+					// console.log("You clicked actor!");
+
+					resetAnimation();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_actors, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+					// Update a/o buttons
+					d3.select("#sortKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortRace")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortEventDate")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortReportDate")
+					.style("background-color", "#2f4f4f");
+
+					//Update this button
+					d3.select("#sortActor")
+					.style("background-color", "#d3d3d3");
+
+
+				});
+
+				d3.select("#sortGender").on("click", function() {
+					// console.log("You clicked the gender!");
+					
+					resetAnimation();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_genero_hom, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+					// Update a/o buttons
+					d3.select("#sortKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortRace")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortEventDate")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortReportDate")
+					.style("background-color", "#2f4f4f");
+
+					//Update this button
+					d3.select("#sortGender")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				d3.select("#sortRace").on("click", function() {
+					// console.log("You clicked the race!");
+
+					resetAnimation();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_pert_etnica, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+					}
+
+					// Update a/o buttons
+					d3.select("#sortKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortEventDate")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortReportDate")
+					.style("background-color", "#2f4f4f");
+
+					//Update this button
+					d3.select("#sortRace")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				d3.select("#sortEventDate").on("click", function() {
+					// console.log("You clicked the event date!");
+					
+					resetAnimation();
+
+					// Optional color by a random color method
+					// var randomColorSelect = Math.random();
+
+					//Update the 3vectors for all of the particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_event_date, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+
+						// Optional color by a random number
+						// if (randomColorSelect < 0.2) {
+						// 	geometry.colors[i] = colorKey(thisDataPt);
+						// } else if (randomColorSelect < 0.4) {
+						// 	geometry.colors[i] = colorHecho(thisDataPt);
+						// } else if (randomColorSelect < 0.6) {
+						// 	geometry.colors[i] = colorActor(thisDataPt);
+						// } else if (randomColorSelect < 0.8) {
+						// 	geometry.colors[i] = colorGender(thisDataPt);
+						// } else {
+						// 	geometry.colors[i] = colorRace(thisDataPt);
+						// }
+
+					}
+
+					// Update a/o buttons
+					d3.select("#sortKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortRace")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortReportDate")
+					.style("background-color", "#2f4f4f");
+
+					//Update this button
+					d3.select("#sortEventDate")
+					.style("background-color", "#d3d3d3");
+
+					// //Create as many timeline events as there are data
+					// d3.select("body")
+					// 	.data(eventTimeline)
+					// 	.enter()
+					// 	.append('div')
+					// 	.attr('class', 'timeline')
+					// 	.style('left', function(d,i){
+					// 		return i*100+"px";
+					// 		console.log("hi");
+					// 	})
+					// 	.append('p')
+					// 	.text(function(d){
+					// 		return d[1];
+					// 	});
+
+				});
+
+				d3.select("#sortReportDate").on("click", function() {
+					// console.log("You clicked the report date!");
+
+					resetAnimation();
+
+					//Update the 3vectors for all of hte particles loaded
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+
+						var start3Vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+						var newXY = getXYCoordinates(thisDataPt.uniqueRank_report_date, myWidth, myHeight);
+						var end3Vector = new THREE.Vector3(newXY[0], newXY[1], 0);
+
+						geometry.vertices[i].startPosition = start3Vector;
+						geometry.vertices[i].endPosition = end3Vector;
+						geometry.vertices[i].direction = start3Vector.clone().sub(end3Vector);
+					}
+
+					// Update a/o buttons
+					d3.select("#sortKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortRace")
+					.style("background-color", "#2f4f4f");
+					d3.select("#sortEventDate")
+					.style("background-color", "#2f4f4f");
+
+					//Update this button
+					d3.select("#sortReportDate")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+
+				// ### Color Events ###
+
+				d3.select("#colorKey").on("click", function() {
+					// console.log("You want to color by key!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorKey(thisDataPt);
+					}
+
+					//Update legend text
+					d3.select("#legend01Text")
+					.text("");
+					d3.select("#legend02Text")
+					.text("");
+					d3.select("#legend03Text")
+					.text("");
+					d3.select("#legend04Text")
+					.text("Coloring by Key");
+
+					//Update legend rectangels
+					d3.select("#legendRect01")
+					.style("background-color", "#000000");
+					d3.select("#legendRect02")
+					.style("background-color", "#000000");
+					d3.select("#legendRect03")
+					.style("background-color", "#000000");
+					d3.select("#legendRect04")
+					.style("background-color", "#fff");
+
+					//Update a/o color buttons
+					d3.select("#colorHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorRace")
+					.style("background-color", "#2f4f4f");
+
+					//Update this color button
+					d3.select("#colorKey")
+					.style("background-color", "#d3d3d3");
+
+
+				});
+
+				d3.select("#colorHecho").on("click", function() {
+					// console.log("You want to color by hecho!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorHecho(thisDataPt);
+					}
+
+					//Update legend text
+					d3.select("#legend01Text")
+					.text("Displacement"); 			//hecho = 5
+					d3.select("#legend02Text")
+					.text("Homicide / Massacre");	//hecho = 6
+					d3.select("#legend03Text")
+					.text("Threat");				//hecho = 2
+					d3.select("#legend04Text")
+					.text("Other");					//hecho = other
+
+					//Update legend rectangels
+					d3.select("#legendRect01")
+					.style("background-color", "#e65c00");
+					d3.select("#legendRect02")
+					.style("background-color", "#00e6bc");
+					d3.select("#legendRect03")
+					.style("background-color", "#3781d1");
+					d3.select("#legendRect04")
+					.style("background-color", "#595959");
+
+					//Update a/o color buttons
+					d3.select("#colorKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorRace")
+					.style("background-color", "#2f4f4f");
+
+					//Update this color button
+					d3.select("#colorHecho")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				d3.select("#colorActor").on("click", function() {
+					// console.log("You want to color by actor!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorActor(thisDataPt);
+					}
+
+					//Update legend
+					d3.select("#legend01Text")
+					.text("Guerrillas");
+					d3.select("#legend02Text")
+					.text("Paramilitaries");
+					d3.select("#legend03Text")
+					.text("Armed Forces");
+					d3.select("#legend04Text")
+					.text("Other or Non-Identified");
+
+					//Update legend rectangels
+					d3.select("#legendRect01")
+					.style("background-color", "#e128aa");
+					d3.select("#legendRect02")
+					.style("background-color", "#aae128");
+					d3.select("#legendRect03")
+					.style("background-color", "#28aae1");
+					d3.select("#legendRect04")
+					.style("background-color", "#595959");
+
+					//Update a/o color buttons
+					d3.select("#colorKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorGender")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorRace")
+					.style("background-color", "#2f4f4f");
+
+					//Update this color button
+					d3.select("#colorActor")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				d3.select("#colorGender").on("click", function() {
+					// console.log("You want to color by gender!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorGender(thisDataPt);
+					}
+
+					//Update legend text
+					d3.select("#legend01Text")
+					.text("");
+					d3.select("#legend02Text")
+					.text("Male");
+					d3.select("#legend03Text")
+					.text("Female");
+					d3.select("#legend04Text")
+					.text("Other or N/A");
+
+					//Update legend rectangels
+					d3.select("#legendRect01")
+					.style("background-color", "#000000");
+					d3.select("#legendRect02")
+					.style("background-color", "#421800");
+					d3.select("#legendRect03")
+					.style("background-color", "#013f34");
+					d3.select("#legendRect04")
+					.style("background-color", "#11253e");
+
+					//Update a/o color buttons
+					d3.select("#colorKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorRace")
+					.style("background-color", "#2f4f4f");
+
+					//Update this color button
+					d3.select("#colorGender")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				d3.select("#colorRace").on("click", function() {
+					// console.log("You want to color by race!");
+
+					//Update colors of the particles
+					for (i = 0; i < dataSetLen; i ++){
+
+						var thisDataPt = datasetVictims[i];
+						geometry.colors[i] = colorRace(thisDataPt);
+					}
+
+					//Update legend text
+					d3.select("#legend01Text")
+					.text("N/A");
+					d3.select("#legend02Text")
+					.text("Afrocolombian");
+					d3.select("#legend03Text")
+					.text("Indigenous");
+					d3.select("#legend04Text")
+					.text("Other");
+
+					//Update legend rectangels
+					d3.select("#legendRect01")
+					.style("background-color", "#2db370");
+					d3.select("#legendRect02")
+					.style("background-color", "#b3842d");
+					d3.select("#legendRect03")
+					.style("background-color", "#842db3");
+					d3.select("#legendRect04")
+					.style("background-color", "#595959");
+
+					//Update a/o color buttons
+					d3.select("#colorKey")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorHecho")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorActor")
+					.style("background-color", "#2f4f4f");
+					d3.select("#colorGender")
+					.style("background-color", "#2f4f4f");
+
+					//Update this color button
+					d3.select("#colorRace")
+					.style("background-color", "#d3d3d3");
+
+				});
+
+				// //No date color :/ could make it a color gradient?
+				// d3.select("#colorEventDate").on("click", function() {
+				// 	console.log("You want to color by date!");
+
+				// 	// Update colors of the particles
+				// 	for (i = 0; i < dataSetLen; i ++){
+
+				// 		var thisDataPt = datasetVictims[i];
+				// 		geometry.colors[i] = colorEventDate(thisDataPt);
+				// 	}
+
+				// 	// Color by date gradient
+
+				// });
+
+
+			}
+
+			// #############################################################################
+			// ##################### THREE JS INITIALIZATION ###############################
+			// #############################################################################
+
+			function init() {
+
+				// Tell Three JS where it will be on the webpage
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				// // Setup view settings
+				// viewSize = 900;
+				// aspectRatio = window.innerWidth / window.innerHeight;
+
+				// myHeight = viewSize;
+				// myWidth = parseInt(viewSize*aspectRatio);
+
+				myPadding = 50;
+				camViewSize = viewSize + myPadding;
+				camHshift = 10; //10
+
+				// Create a Three JS camera and position it to look at our viz
+				// camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
+				// camera = new THREE.OrthographicCamera(-aspectRatio * viewSize / 2, aspectRatio * viewSize / 2, viewSize/2, viewSize/ -2, -100, 100);
+				camera = new THREE.OrthographicCamera(-aspectRatio * camViewSize / 2, aspectRatio * camViewSize / 2, camViewSize/2+camHshift, camViewSize/ -2+camHshift, -100, 100);
+				camera.position.x = myWidth/2;
+				camera.position.y = myHeight/2;
+				camera.position.z = 1;
+
+
+				// Initialize the scene that will hold our geometry
+				scene = new THREE.Scene();
+
+				// We must bind the data to geometry - the geometry itself cannot be visualized without being assigned a material
+				// (later in code), but it holds valuable data like the position of each data point
+				geometry = new THREE.Geometry();
+
+				// For each data point, create a vertex and a color
+				// For the intial data load we abritrarily set the data to sort to report date XY positions and
+				// we assign the color to be based off of the color key
+				for ( i = 0; i < datasetVictims.length; i ++ ) {
+					thisDataPt = datasetVictims[i];
+
+					var xyCoord = getXYCoordinates(thisDataPt.key, myWidth, myHeight);
+					var vertex = new THREE.Vector3();
+					vertex.startPosition = new THREE.Vector3(xyCoord[0], xyCoord[1], 0);
+					xyCoord = getXYCoordinates(thisDataPt.uniqueRank_report_date, myWidth, myHeight);
+					vertex.endPosition = new THREE.Vector3(xyCoord[0], xyCoord[1], 0);
+					vertex.direction = vertex.startPosition.clone().sub(vertex.endPosition);
+					vertex.copy(vertex.startPosition);
+
+					geometry.vertices.push( vertex );
+
+					colors[i] = colorKey(thisDataPt);
+				}
+
+				// Assign our desired color to each piece of geometry
+				geometry.colors = colors;
+
+				// For each datapoint we asign a point material with a rectangle (pixel) size and our desired color
+				material = new THREE.PointsMaterial({size: rectSize, sizeAttenuation: false, vertexColors: THREE.VertexColors});
+
+				// We now bind the geometry to the material to create a point that can be visualized, and then add those points to the scene
+				particles = new THREE.Points(geometry, material);
+				scene.add(particles);
+
+				// Create a mesh sphere that we place over the datapoint that the users mouse is hovering on
+				var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+				var sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, shading: THREE.FlatShading } );
+				sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);	// bind the geometry to the material and create a mesh
+				scene.add(sphere);		// add this mesh to the scene
+
+				// In order to handle mouseover events we create a raycaster and a threshold
+				// from the camera's POV, whenever the mouse comes within our threshold of a given location
+				// we will want to get this mouse over position and the associated point's data to display to the suer
+				raycaster = new THREE.Raycaster();
+				raycaster.params.Points.threshold = threshold;
+
+				// To actually render the scene we execute the following
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				// Displays our framerate in the ULH corner
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				// Event listeners that listen for when the mouse is moved or when the window is resized
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				// document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				// document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+				// document.addEventListener( 'mousedown', onDocumentMouseDown, false);
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				console.log(eventTimeline);
+				//Create as many timeline events as there are data
+				var eventTimelineContainer = d3.select("body")
+					.selectAll('div')
+					.data(eventTimeline)
+					.enter()
+					.append("div")
+						.attr("class", ".timeline")
+						.style("left", "20px")
+						.text( function(d){
+							console.log("hi");
+							return "hi";
+						});
+
+				// eventTimelineContainer.enter()
+				// 	.append('div')
+				// 	.attr('class', 'timeline');
+
+				// eventTimelineContainer.selectAll("#timelineText")
+				// 	.data(eventTimeline)
+				// 	.text( function(d) {
+				// 		console.log(d[1]);
+				// 		return d[1];
+				// 	});
+
+					// .enter()
+					// .append(".timeline")
+					// .style("left", "30px");
+					// .style('left', function(d, i) {
+					// 	console.log(i);
+					// 	// var timeLineX = getXYCoordinates(d[0], myWidth, myHeight)[0];
+					// 	// console.log(timeLineX);
+					// 	// return timeLineX+"px";
+					// })
+				// d3.selectAll(".timeline")
+				// 	.data(eventTimeline)
+				// 	.enter()
+				// 	// .style('text', function(d, i){
+				// 	// 	// return d[1];
+				// 	// 	console.log(i);
+				// 	// });
+				// 	.select("#timelineText")
+				// 	.text("Hurray!");
+
+			}
+
+			// #############################################################################
+			// ######################## THREE JS DOCUMENT EVENTS ###########################
+			// #############################################################################
+
+			function onWindowResize() {
+				//Variables to update whenever the browser window is resized
+
+				// console.log("Window resized");
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				aspectRatio = window.innerWidth / window.innerHeight;
+
+				camera.left   = - camViewSize * aspectRatio / 2;
+				camera.right  =   camViewSize * aspectRatio / 2;
+				camera.top    =   camViewSize / 2 + camHshift;
+				camera.bottom = - camViewSize / 2 + camHshift;
+
+				camera.updateProjectionMatrix();
+
+				// myHeight = viewSize;
+				// myWidth = viewSize*aspectRatio;
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onDocumentMouseMove( event ) {
+				//Update our mouse x and y position whenever the mouse moves
+
+				event.preventDefault();
+
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+				// console.log(mouse);
+
+			}
+
+
+			// #############################################################################
+			// ############################ COLOR FUNCTIONS ###############################
+			// #############################################################################
+
+			// Rules to color each parameter given a datapoint
+
+			function colorKey (_thisDataPt) {
+				var gradientLength = 255;
+
+				return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
+			}
+
+			function colorHecho (_thisDataPt) {
+				// //RGB COLORS
+				// var _color1 = new THREE.Color("rgb(24, 100, 90)");
+				// var _color2 = new THREE.Color("rgb(169, 100, 90)");
+				// var _color3 = new THREE.Color("rgb(211, 200, 82)");
+				// var _color4 = new THREE.Color("rgb(0, 0, 35)");
+
+				//HEX COLORS Processing consistent
+				var _color1 = new THREE.Color("#e65c00");
+				var _color2 = new THREE.Color("#00e6bc");
+				var _color3 = new THREE.Color("#3781d1");
+				var _color4 = new THREE.Color("#595959");
+
+
+				if(_thisDataPt.param_hecho == 5) {
+					return _color1;
+				}
+				else if(_thisDataPt.param_hecho == 6) {
+					return _color2;
+				}
+				else if(_thisDataPt.param_hecho == 2) {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}
+			}
+
+			function colorActor (_thisDataPt) {
+				// //RGB Colors
+				// var _color1 = new THREE.Color("rgb(250, 100, 100)");
+				// var _color2 = new THREE.Color("rgb(20, 160, 190)");
+				// var _color3 = new THREE.Color("rgb(90, 140, 250)");
+				// var _color4 = new THREE.Color("rgb(200, 160, 80)");
+
+				//Hex Colors Processing Consistent
+				var _color1 = new THREE.Color('#e128aa');
+				var _color2 = new THREE.Color('#aae128');
+				var _color3 = new THREE.Color('#28aae1');
+				var _color4 = new THREE.Color('#595959');
+
+				if (_thisDataPt.autor_guerrillas == 1) {
+					return _color1;
+				}
+				else if(_thisDataPt.autor_paramilitares == 1) {
+					return _color2;
+				}
+				else if(_thisDataPt.autor_fuerza_publica == 1) {
+					return _color3;
+				} 
+				else {
+					return _color4;
+				}
+			}
+
+			function colorGender (_thisDataPt) {
+				//Might need ot change for large or small city
+
+				// //RGB Color
+				// var _color1 = new THREE.Color("rgb(318, 82, 88)");
+				// var _color2 = new THREE.Color("rgb(78, 82, 88)");
+				// var _color3 = new THREE.Color("rgb(198, 82, 88)");
+				// var _color4 = new THREE.Color("rgb(70, 30, 35)");
+
+				//Hex Colors Processing Consistent
+				var _color1 = new THREE.Color('#421800');
+				var _color2 = new THREE.Color('#013f34');
+				// var _color3 = new THREE.Color('#28aae1');
+				var _color4 = new THREE.Color('#11253e');
+
+				if(_thisDataPt.genero_hom == "Hombre") {
+					return _color1;
+				}
+				else if(_thisDataPt.genero_hom == "Mujer") {
+					return _color2;
+				}
+				// else if(_thisDataPt.genero_hom == "No Informa") {
+				// 	return _color3;
+				// }
+				else {
+					return _color4;
+				}
+			}
+
+			function colorRace (_thisDataPt) {
+				// //RGB Colors
+				// var _color1 = new THREE.Color("rgb(150, 75, 70)");
+				// var _color2 = new THREE.Color("rgb(39, 75, 100)");
+				// var _color3 = new THREE.Color("rgb(279, 75, 75)");
+				// var _color4 = new THREE.Color("rgb(90, 90, 35)");
+
+				//Hex Colors Processing Consistent
+				var _color1 = new THREE.Color("#2db370");
+				var _color2 = new THREE.Color("#b3842d");
+				var _color3 = new THREE.Color("#842db3");
+				var _color4 = new THREE.Color("#595959");
+
+				if(_thisDataPt.pert_etnica == "None") {
+					return _color1;
+				}
+				else if(_thisDataPt.pert_etnica == "Afrocolombian") {
+					return _color2;
+				}
+				else if(_thisDataPt.pert_etnica == "Indigenous") {
+					return _color3;
+				}
+				else {
+					return _color4;
+				}	
+			}
+
+			// function colorEventDate (_thisDataPt) {
+			// 	var gradientLength = datasetVictims.length;;
+
+			// 	return new THREE.Color("rgb(100, " + _thisDataPt.key%gradientLength + ", 100)");
+			// }
+
+			function getTooltipText (_thisDataPt) {
+				//Parse Text For ToolTip Mousover
+				var textList = ["Date: ", "Event: ", "Actor: ", "Gender: ", "Ethnicity: "];
+
+				textList[0] = textList[0] + _thisDataPt.f_ocurrencia_hecho.slice(0, -5);
+
+				//Parse event data into text
+				if(_thisDataPt.param_hecho == 5) {
+					var _eventText = "Displacement";
+				}
+				else if(_thisDataPt.param_hecho == 6) {
+					var _eventText = "Homocide / Massacre";
+				}
+				else if(_thisDataPt.param_hecho == 2) {
+					var _eventText = "Threat";
+				}
+				else {
+					var _eventText = "Other";
+				}
+				textList[1] = textList[1] + _eventText;
+
+				// Parse actor data  into text
+				if (_thisDataPt.autor_guerrillas == 1) {
+					var _actorText = "Guerrillas";
+				}
+				else if(_thisDataPt.autor_paramilitares == 1) {
+					var _actorText = "Paramilitaries";
+				}
+				else if(_thisDataPt.autor_fuerza_publica == 1) {
+					var _actorText = "Armed Forces";
+				} 
+				else {
+					var _actorText = "Other or Non-Identified";
+				}
+				textList[2] = textList[2] + _actorText;
+
+				textList[3] = textList[3] + _thisDataPt.genero_hom;
+				textList[4] = textList[4] + _thisDataPt.pert_etnica;
+
+				return textList;
+			}
+
+
+			// #############################################################################
+			// ##################### THREE JS ANIMATION  AND RENDER ########################
+			// #############################################################################
+
+			function resetAnimation() {
+				//Function that we call to reset the animation
+
+				// turn off the raycaster while the viz is transitioning to reduce burden on browser
+				raycastOn = false;
+				// console.log(raycastOn);
+
+				// Reset our countdown timer - this timer is what enables the particles to slide along their
+				// initial position to their final position
+				currentTime = duration;
+			}
+
+			//Time delta to track time passed
+			var delta;
+
+
+			function animate() {
+				//Function attempts to run 60 FPS to run our Viz smoothly
+
+				//
+				delta = clock.getDelta();
+				currentTime -= delta;
+
+				if(currentTime < 0) {
+					// currentTime is less than 0 so any user defined sort has finished
+
+					// reset our currenTime to 0 since it is already negative
+					 currentTime = 0;
+
+					// Since the particles are not moving we want to calculate raytracing and mouseover				 
+					 raycastOn = true;
+				}
+				// Three JS request the animation frame
+				requestAnimationFrame( animate );
+
+				// Moves the particles from their initial positin to their final position
+				// Note that once the particles arrive in the user defined sort positoins, after a sort is complete
+				// (inital position) = (final position) and the length of the vector is 0 so the particles do not move
+				geometry.vertices.forEach(function(vertex){
+					vertex.addVectors(vertex.endPosition,vertex.direction.clone().multiplyScalar(currentTime / duration));
+				});
+
+				// Tells Three JS that we should update the geometries verticies (position on screen) and their color
+				// for every frame we display
+				geometry.verticesNeedUpdate = true;
+				geometry.colorsNeedUpdate = true;
+
+				// Tell Three JS to redner the scene and update our stats
+				render();
+				stats.update();
+
+			}
+
+
+			function render() {
+
+				//Find where the event is in world coordinates
+				// console.log(mouse);
+				worldX = parseInt(map_range(mouse.x, -1, 1, 0, windowHalfX*2));
+				// console.log(worldX);
+				worldY = parseInt(map_range(mouse.y, -1, 1, windowHalfY*2, 0));
+				// console.log(worldX, worldY);
+
+				// d3.select("body")
+				// 	.append("div")
+
+
+				// //Cycle through the timelines and add data
+				// d3.selectAll(".timeline")
+				// 	.data(eventTimeline)
+				// 	.enter()
+				// 	.style('left', function(d) {
+				// 		var timeLineX = getXYCoordinates(d[0]);
+				// 		// timeLineX = map_range()
+				// 		// console.log(d[1]);
+				// 		return timeLineX+"px";
+				// 	})
+				// 	.style('text', function(d){
+				// 		return d[1]
+				// 	});
+
+				// d3.select(".timeline")
+				// 	.style("left", worldX+"px");
+
+
+				//Calculate raycaster intersections (mouseover events) when we are not actively moving particles on screen
+				if (raycastOn) {
+					// Tell three JS where we are drawing our ray from and based on what point
+					raycaster.setFromCamera( mouse, camera );
+
+					// Calculate what paricles if any the raycaster intersects
+					var intersections = raycaster.intersectObject(particles);
+					intersection = (intersections.length) > 0 ? intersections[0] : null;
+
+					if(intersection != null) {
+						// In the event that we DO intersect a particle, intersection is not null and we proceed
+
+						// Find intersection point so we know where to display our div
+						var intersectPosition = intersection.point;
+
+						// console.log(canvasToWorldXYCoords (intersectPosition));
+						// console.log(mouse);
+
+						// var divXLoc = intersectPosition.x;
+						var divXLoc = worldX;
+						if (divXLoc > windowHalfX) {
+							divXLoc = divXLoc - 250;
+						} else {
+							divXLoc = divXLoc + 50;
+						}
+
+						// var divYLoc = (windowHalfY*2 - intersectPosition.y +camHshift) ;
+						// var divYLoc = (windowHalfY*2 - intersectPosition.y) ;
+						var divYLoc = worldY;
+						if (divYLoc > windowHalfY) {
+							divYLoc = divYLoc - 100;
+						}
+						// } else {
+						// 	divYLoc = divYLoc - 150;
+						// }
+
+						//Move our sphere to the intersected poisition
+						sphere.position.copy(intersectPosition);
+						sphere.scale.set(2, 2, 2);
+
+						//Get this data points parameters as text to display in the tool tip
+						tooltipTextList = getTooltipText(datasetVictims[intersection.index])
+
+						// Tell d3 where to display our tooltip
+						d3.select("#tooltip")
+						.transition()
+						.duration(100)
+						.style("left", divXLoc + "px")						//eventually should scale the x,y so it is the same size as the space where the pixels are displayed
+						// .style("left", mouseCoordinates[0] + "px")
+						.style("top", divYLoc + "px");
+
+						d3.select("#dateText")
+						.text(tooltipTextList[0]);
+						// .text("i: " + intersection.index + ", x pos: " + geometry.vertices[intersection.index].x + ", y pos: " + geometry.vertices[intersection.index].y );
+						// .text( tooltipTextList[0] + "\n" + tooltipTextList[1] + "\n" + tooltipTextList[2] + "\n" + tooltipTextList[3] +"\n"+ tooltipTextList[4] );
+						
+						d3.select("#tooltip")
+						.select("#eventText")
+						.text(tooltipTextList[1]);
+
+						d3.select("#tooltip")
+						.select("#actorText")
+						.text(tooltipTextList[2]);
+
+						d3.select("#tooltip")
+						.select("#genderText")
+						.text(tooltipTextList[3]);
+
+						d3.select("#tooltip")
+						.select("#ethnicityText")
+						.text(tooltipTextList[4]);
+
+						//Show the tooltip
+						d3.select("#tooltip").classed("hidden", false);
+
+					} else {
+						//Hide the tooltip
+						d3.select("#tooltip").classed("hidden", true);
+					}
+				} else {
+					//Hide the tooltip
+					d3.select("#tooltip").classed("hidden", true);
+				}
+
+
+
+				// Three JS render this scene with this camera
+				renderer.render( scene, camera );
+
+			}
+
+			//Given a data index return the x and y coordinates in the array
+			function getXYCoordinates(_thisIndex, _width, _height) {
+					//Eventually will change so data is sorted from top to bottom
+
+					// //Sorting from left to right, starting at bottom Right Hand Corner
+					// maxWidth = _width - (_width%(rectSize+rectSpacerW));
+
+					// var myList = [];
+
+					// myList[0] = parseInt((_thisIndex*(rectSize+rectSpacerW))%maxWidth)
+					// myList[1] = parseInt( ( ( (1+_thisIndex) * (rectSize+rectSpacerH) ) / _width) ) * (rectSpacerH+rectSize)
+
+					// myList[0] = (_thisIndex*(rectSize+rectSpacerW))%maxWidth
+					// myList[1] = ( ( ( (1+_thisIndex) * (rectSize+rectSpacerH) ) / _width) ) * (rectSpacerH+rectSize)
+
+					//Sorting from top to bottom, starting at upper left hand corner
+					maxHeight = _height - (_height%(rectSize+rectSpacerH));
+
+					var myList = [];
+					myList[0] = parseInt( ( (1+_thisIndex) * (rectSize+rectSpacerH) ) / _height ) * (rectSpacerW+rectSize)
+					myList[1] = parseInt(maxHeight - (_thisIndex*(rectSize+rectSpacerH))%maxHeight)
+
+
+					return myList;
+			}
+
+			//Map values
+			function map_range(value, low1, high1, low2, high2) {
+			    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+			}
+
+
+
+		</script>
+	</body>
+</html>
