@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
 function parseQuery (qstr) {
     var query = {};
     var a = qstr.split('&');
@@ -39,7 +42,11 @@ map = (function () {
     var map = L.map('map', {
         "keyboardZoomOffset" : 1.,
         "minZoom" : 6,
+<<<<<<< HEAD
         "maxZoom" : 15,
+=======
+        "maxZoom" : 11,
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
         "zoomControl" : true,
         }
     );
@@ -190,7 +197,11 @@ d3.json("DisplacementLargeEdited_200+.geojson", function(error, collection) {
   // Reposition the SVG to cover the features.
   function reset() {
     $('svg').css("display","none");
+<<<<<<< HEAD
       console.log("reset");
+=======
+      // console.log("reset");
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
     var bounds = path.bounds(collection),
         topLeft = bounds[0],
         bottomRight = bounds[1];
@@ -286,25 +297,43 @@ var citiesNoAccent=[
 
 //proportionally sized icons
 var smallIcon = L.icon({
+<<<<<<< HEAD
     iconUrl: 'icon.png',
     iconSize: [20, 23.75],
     iconAnchor: [10, 23.5/2],
+=======
+    iconUrl: 'icon2.png',
+    iconSize: [20, 23.75],
+    iconAnchor: [10, 10], //    iconAnchor: [10, 23.5/2],
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
     popupAnchor: [-0.75, -16.5]
 });
 
 
 var mediumIcon = L.icon({
+<<<<<<< HEAD
     iconUrl: 'icon.png',
     iconSize: [30, 35.625],
     iconAnchor: [15, 35.625/2],
+=======
+    iconUrl: 'icon2.png',
+    iconSize: [30, 35.625],
+    iconAnchor: [15, 15],            // formerly iconAnchor: [15, 35.625/2],
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
     popupAnchor: [-0.75, -16.5]
 });
 
 
 var largeIcon = L.icon({
+<<<<<<< HEAD
     iconUrl: 'icon.png',
     iconSize: [40, 47.5],
     iconAnchor: [20, 23.75],
+=======
+    iconUrl: 'icon2.png',
+    iconSize: [40, 47.5],
+    iconAnchor: [20, 20],           // formerly 20, 23.75
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
     popupAnchor: [-0.75, -16.5]
 });
 
@@ -322,7 +351,11 @@ function chooseIcon(population){
 
 
 //add icons for 28 cities
+<<<<<<< HEAD
 for (j=0; j<29; j++)
+=======
+for (j=0; j< cities.length; j++)
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
 {
     var marker = L.marker(cities[j][1],
         {
@@ -337,6 +370,21 @@ for (j=0; j<29; j++)
 };
 
 
+<<<<<<< HEAD
+=======
+// // Find max population length, base all bars off this max length
+// var maxBarLen = 0;
+// for (i =0; i<cities.length; i++)
+// {
+//     if (cities[i][2] > maxBarLen)
+//     {
+//         maxBarLen = cities[i][2];
+//     }
+// }
+// console.log(maxBarLen)
+
+
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
 //on marker click, open data tray
 //save the ID of the last clicked city
 var lastClicked=0;
@@ -351,7 +399,11 @@ function markerClick(city){
 
        });
     var icon  = Array.prototype.slice.call(document.getElementsByClassName(city));
+<<<<<<< HEAD
     console.log(icon);
+=======
+    // console.log(icon);
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
     lastClicked=city;
     [].forEach.call(icon, function(test){  
 
@@ -360,7 +412,11 @@ function markerClick(city){
 
     });
 
+<<<<<<< HEAD
 //remove irrelevant paths
+=======
+    //remove irrelevant paths
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
     var paths = document.getElementsByTagName('path');
     [].forEach.call(paths, function(test){
         if(test.getAttribute("hide")>0){
@@ -369,6 +425,7 @@ function markerClick(city){
             test.setAttribute("display",'none');
         };
     });
+<<<<<<< HEAD
     
     
     
@@ -377,6 +434,15 @@ function markerClick(city){
  
     var city_space = city.replace(/-/g,' ');
     console.log(city);
+=======
+
+    
+    //modify inner html
+    var info = document.getElementById("image");
+ 
+    var city_space = city.replace(/-/g,' ');
+    // console.log(city);
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
 
     var index = 0;
     for (i = 0;i<cities.length; i++)
@@ -398,6 +464,7 @@ function markerClick(city){
     }
     $('#title').html(city);
 
+<<<<<<< HEAD
 
 
     mapDiv.style.visibility="visible";
@@ -416,6 +483,28 @@ function markerClick(city){
 
 
     $("#ipc").animate({'width':''+100*csv[lookup[city_space]][13]/cities[index][2]+"%"});
+=======
+    //Determine max bar length based off of div sizes
+    var maxBarLen = Math.max(cities[index][2], csv[lookup[city_space]][11], csv[lookup[city_space]][12], csv[lookup[city_space]][13]);
+    // console.log(maxBarLen);
+
+    mapDiv.style.visibility="visible";
+    // console.log(cities[index][2]);
+    //mapDiv.style.opacity=1;
+
+    $("#population").animate({'width':''+100*cities[index][2]/maxBarLen+"%"});
+    document.getElementById("ptext").innerHTML=""+ cities[index][2] +" Population";
+
+    $("#desplazados").animate({'width':''+100*csv[lookup[city_space]][11]/maxBarLen+"%"});
+    document.getElementById("dtext").innerHTML=""+ csv[lookup[city_space]][11] +" Displaced";
+
+
+    $("#refugiados").animate({'width':''+100*csv[lookup[city_space]][12]/maxBarLen+"%"});
+    document.getElementById("rtext").innerHTML=""+ csv[lookup[city_space]][12] +" Refugees";
+
+
+    $("#ipc").animate({'width':''+100*csv[lookup[city_space]][13]/maxBarLen+"%"});
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
     document.getElementById("itext").innerHTML=""+ csv[lookup[city_space]][13] +" ICP's";
     
     $(mapDiv).fadeTo(1000,1)
@@ -451,7 +540,10 @@ $(document).click(function(event){
     
 });
 
+<<<<<<< HEAD
 
 
 
 
+=======
+>>>>>>> 8c8385a8a620608fb20bda3a47d9e2ad084b7ed1
